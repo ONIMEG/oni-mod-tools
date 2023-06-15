@@ -1,5 +1,11 @@
-import { createApp } from "vue";
-import "./styles.css";
-import App from "./App.vue";
-
-createApp(App).mount("#app");
+import { createApp } from 'vue';
+import './styles.css';
+import './style/vars.css';
+import './style/atom.css';
+import App from './App.vue';
+import router from './router';
+import { createPinia } from 'pinia';
+const app = createApp(App);
+app.use(router);
+app.use(createPinia());
+app.mount('#app');
