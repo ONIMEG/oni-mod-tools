@@ -5,26 +5,39 @@ use std::{
   iter
 };
 use std::io::{Write};
+use std::path::Path;
 use anyhow::{Result, Error as AnyError, anyhow};
 use xml::reader::{EventReader, XmlEvent};
 use serde::{Deserialize, Serialize};
 use zip::ZipArchive;
 use uuid::Uuid;
 
-#[derive(Debug,Serialize,Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CreateProjectInfo {
   pub root: PathBuf,
   pub project_name: String,
   pub solution_name: String,
 }
 
-#[derive(Debug, Deserialize,Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ProjectItem {
+  pub path: PathBuf,
+  pub name: String
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SavedSolutionItem {
+  pub path: PathBuf,
+  pub name: String
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Project {
   #[serde(rename = "PropertyGroup")]
   pub property_group: PropertyGroup
 }
 
-#[derive(Debug, Deserialize,Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct PropertyGroup {
   #[serde(rename = "AssemblyTitle")]
   pub assembly_title: String,
@@ -49,7 +62,7 @@ impl Project {
         assembly_title: csproj_name.clone(),
         file_version: String::from("1.0.0"),
         root_namespace: csproj_name.clone(),
-        description: String::from("缺氧 mod"),
+        description: String::from("缺氧模组"),
         assembly_version: String::from("1.0.0"),
         last_working_build: 526233,
         platforms: String::from("Vanilla;Mergedown"),
@@ -58,12 +71,42 @@ impl Project {
   }
 }
 
+impl ProjectItem {
+  pub fn new(path: PathBuf, name: String) -> ProjectItem {
+    ProjectItem{
+      path,
+      name
+    }
+  }
+}
+
+impl SavedSolutionItem {
+  pub fn new(path: PathBuf, name: String) -> SavedSolutionItem {
+    SavedSolutionItem{
+      path,
+      name
+    }
+  }
+}
+
 const CS_GUID: &str = "9A19103F-16F7-4668-BE54-9A1E7A4F7556";
 const PROJECT_ITEM: &str = r#"Project("{$[a]}") = "$[b]", "$[b]\$[b].csproj", "{$[c]}"
 EndProject"#;
 
+fn save_solution_item(info: &CreateProjectInfo) -> Result<(), AnyError> {
+  let path = Path::new("solutions.json");
+  let mut saved_solutions:Vec<SavedSolutionItem> = vec![];
+  if path.exists() {
+    saved_solutions = serde_json::from_str::<Vec<SavedSolutionItem>>(&read_to_string(path)?)?;
+  }
+  saved_solutions.push(SavedSolutionItem::new(info.root.clone(), info.solution_name.clone()));
+  let content = serde_json::to_string(&saved_solutions)?;
+  fs::write(path, content)?;
+  Ok(())
+}
 
 pub fn create_project(info: CreateProjectInfo) -> Result<(), AnyError> {
+  save_solution_item(&info)?;
   let solution_path = info.root.join(&info.solution_name);
   if solution_path.exists() {
     return Err(anyhow!("项目文件夹已存在"));
@@ -113,7 +156,21 @@ pub fn create_csproj(target_path: PathBuf, new_info:Project)->Result<(), AnyErro
   new_csproj_xml = new_csproj_xml.replace(
     "<Project>",
     "<Project Sdk=\"Microsoft.NET.Sdk\">");
-  fs::write(target_path, new_csproj_xml)?;
+  fs::write(&target_path, new_csproj_xml)?;
+  let parent = target_path.parent().unwrap().parent().expect("没找到根目录");
+  let admin = parent.join(".admin");
+  let mut csproj_s:Vec<ProjectItem> = vec![];
+  if !admin.exists() {
+    csproj_s.push(ProjectItem::new(target_path,new_info.property_group.assembly_title));
+    let content = serde_json::to_string(&csproj_s)?;
+    fs::write(admin,content)?;
+    return Ok(());
+  }
+  let mut content = read_to_string(&admin)?;
+  csproj_s = serde_json::from_str(&content.as_str())?;
+  csproj_s.push(ProjectItem::new(target_path,new_info.property_group.assembly_title));
+  content = serde_json::to_string(&csproj_s)?;
+  fs::write(admin,content)?;
   Ok(())
 }
 
@@ -170,6 +227,10 @@ fn format_xml(xml_string: String) -> Result<String, AnyError> {
   Ok(formatted_xml)
 }
 
+pub fn get_csproj_list(solution_item: SavedSolutionItem) -> Result<String, AnyError> {
+  let admin = solution_item.path.join(solution_item.name).join(".admin");
+  return Ok(read_to_string(admin)?);
+}
 
 #[cfg(test)]
 mod tests {
@@ -196,7 +257,7 @@ mod tests {
   fn create_csproj_test() {
     let project = Project ::new(String::from("test"));
     let result = create_csproj(
-      PathBuf::from("target/test.csproj"),project);
+      PathBuf::from("target/debug/test.csproj"),project);
     assert_eq!(result.is_ok(), true)
   }
 

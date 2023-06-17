@@ -4,6 +4,7 @@ import {
   NFormItem,
   NInput,
   NButton,
+  NIcon,
   NSpin,
   FormInst,
   useMessage,
@@ -16,6 +17,10 @@ import {
   StatusCode,
 } from '../uitls/invokes';
 import { useProjectStore } from '../store/project.store';
+import { ArrowLeftOutlined as Back } from '@vicons/antd';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const formRef = ref<FormInst | null>(null);
 const formInfo = ref<CreateProjectInfo>({
@@ -70,6 +75,19 @@ async function create(e: MouseEvent) {
 
 <template>
   <n-spin class="form flex flex-all-center" :show="loadingVisible">
+    <n-button
+      id="back"
+      @click="
+        () => {
+          router.back();
+        }
+      "
+      secondary
+    >
+      <n-icon>
+        <Back />
+      </n-icon>
+    </n-button>
     <h2 class="title">创建解决方案</h2>
     <n-form
       label-placement="left"
@@ -134,7 +152,9 @@ async function create(e: MouseEvent) {
   margin-bottom: 2rem;
 }
 
-input {
-  border-radius: 0 !important;
+#back {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
 }
 </style>

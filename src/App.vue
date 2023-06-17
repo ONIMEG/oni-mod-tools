@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-  NLayout,
-  NLayoutContent,
-  NLayoutHeader,
-  NMessageProvider,
-} from 'naive-ui';
+import { NLayout, NLayoutContent, NMessageProvider } from 'naive-ui';
 </script>
 
 <template>
@@ -21,7 +16,11 @@ import {
     <n-layout class="full-height">
       <n-layout-content class="full-height view">
         <n-message-provider>
-          <router-view class="full-height"></router-view>
+          <router-view class="full-height" v-slot="{ Component }">
+            <transition name="fade" mode="out-in">
+              <component :is="Component" />
+            </transition>
+          </router-view>
         </n-message-provider>
       </n-layout-content>
     </n-layout>
@@ -29,13 +28,13 @@ import {
 </template>
 
 <style scoped>
-.nav {
-  padding: 0;
-  border-bottom: 1px solid var(--n-border-color);
-  height: var(--nav-height);
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
 }
 
-.menu {
-  border-right: 1px solid var(--n-border-color);
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

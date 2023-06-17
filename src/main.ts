@@ -1,5 +1,4 @@
 import { createApp } from 'vue';
-import './styles.css';
 import './style/vars.css';
 import './style/atom.css';
 import App from './App.vue';

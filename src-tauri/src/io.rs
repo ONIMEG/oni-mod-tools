@@ -1,3 +1,5 @@
+use std::fs;
+use std::path::Path;
 use serde::{Deserialize, Serialize};
 use crate::functions::{project};
 
@@ -5,6 +7,8 @@ use crate::functions::{project};
 const SUCCESS:u16 = 200;
 const CONVERT_ERROR:u16 = 500;
 const CREATE_PROJECT_ERROR:u16 = 501;
+const GET_SOLUTION_LIST_ERROR:u16 = 502;
+const GET_PROJECT_LIST_ERROR:u16 = 503;
 
 #[derive(Debug,Serialize,Deserialize)]
 pub struct ResultBody{
@@ -22,7 +26,6 @@ impl ResultBody {
   }
 }
 
-
 pub fn create_project(json_create_project_info:String) -> String{
   let create_project_info:Result<project::CreateProjectInfo, _> = serde_json::from_str(
     &json_create_project_info);
@@ -39,6 +42,31 @@ pub fn create_project(json_create_project_info:String) -> String{
   }
 
   ResultBody::convert(SUCCESS,"ok")
+}
+
+pub fn get_solution_list() -> String{
+  let path = Path::new("solutions.json");
+  if  path.exists() {
+    let result = fs::read_to_string(path);
+    return if result.is_ok() {
+      ResultBody::convert(SUCCESS, result.unwrap().as_str())
+    } else {
+      ResultBody::convert(GET_SOLUTION_LIST_ERROR, result.err().unwrap().to_string().as_str())
+    }
+  }
+  return ResultBody::convert(SUCCESS,"[]");
+}
+
+pub fn get_project_list(json_solution_item:String) -> String{
+  let solution_item = serde_json::from_str(&json_solution_item);
+  if !solution_item.is_ok() {
+    return ResultBody::convert(CONVERT_ERROR, solution_item.err().unwrap().to_string().as_str())
+  }
+  let result = project::get_csproj_list(solution_item.unwrap());
+  if  !result.is_ok() {
+    return ResultBody::convert(GET_PROJECT_LIST_ERROR, result.err().unwrap().to_string().as_str())
+  }
+  return ResultBody::convert(SUCCESS, result.unwrap().as_str());
 }
 
 #[cfg(test)]
