@@ -69,6 +69,19 @@ pub fn get_project_list(json_solution_item:String) -> String{
   return ResultBody::convert(SUCCESS, result.unwrap().as_str());
 }
 
+pub fn add_new_project(json_solution_info:String, json_new_project_info:String) -> String{
+  let solution_info:Result<project::CreateProjectInfo, _>= serde_json::from_str(&json_solution_info);
+  let new_project_info:Result<project::Project, _> = serde_json::from_str(&json_new_project_info);
+  if solution_info.is_err() || new_project_info.is_err() {
+    return ResultBody::convert(CONVERT_ERROR, "转换失败");
+  }
+  let result = project::add_new_project(solution_info.unwrap(), new_project_info.unwrap());
+  if !result.is_ok() {
+    return ResultBody::convert(CREATE_PROJECT_ERROR, result.err().unwrap().to_string().as_str())
+  }
+  return ResultBody::convert(SUCCESS,"ok");
+}
+
 #[cfg(test)]
 mod tests {
   use std::fs;

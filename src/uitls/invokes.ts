@@ -24,6 +24,21 @@ export type SolutionItem = {
 export type CsprojItem = {
   path: string;
   name: string;
+  prop: Project;
+};
+
+export type Project = {
+  PropertyGroup: Property;
+};
+
+type Property = {
+  AssemblyTitle: string;
+  FileVersion: string;
+  RootNamespace: string;
+  Description: string;
+  AssemblyVersion: string;
+  LastWorkingBuild: number;
+  Platforms: string;
 };
 
 export async function createProject(
@@ -42,5 +57,18 @@ export async function getSavedSolutionsList(): Promise<ResultBody> {
 export async function getCsprojList(infoJ: SolutionItem): Promise<ResultBody> {
   const info: string = JSON.stringify(infoJ);
   const result: string = await invoke<string>('get_csproj_list', { info });
+  return JSON.parse(result);
+}
+
+export async function addNewProject(
+  solutionInfoJ: CreateProjectInfo,
+  projectInfoJ: Project,
+): Promise<ResultBody> {
+  const sln: string = JSON.stringify(solutionInfoJ);
+  const csproj: string = JSON.stringify(projectInfoJ);
+  const result: string = await invoke<string>('add_new_project', {
+    sln,
+    csproj,
+  });
   return JSON.parse(result);
 }

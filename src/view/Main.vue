@@ -22,6 +22,8 @@ const solutionList = ref<SolutionItem[]>([]);
 
 async function openSelectedSolution(item: SolutionItem) {
   projectInfo.solutionItem = item;
+  projectInfo.createProjectInfo.solution_name = item.name;
+  projectInfo.createProjectInfo.root = item.path;
   await router.push('/solution');
 }
 

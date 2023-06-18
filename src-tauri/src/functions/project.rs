@@ -19,10 +19,11 @@ pub struct CreateProjectInfo {
   pub solution_name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProjectItem {
   pub path: PathBuf,
-  pub name: String
+  pub name: String,
+  pub prop: Project
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -31,13 +32,13 @@ pub struct SavedSolutionItem {
   pub name: String
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Project {
   #[serde(rename = "PropertyGroup")]
   pub property_group: PropertyGroup
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct PropertyGroup {
   #[serde(rename = "AssemblyTitle")]
   pub assembly_title: String,
@@ -72,10 +73,11 @@ impl Project {
 }
 
 impl ProjectItem {
-  pub fn new(path: PathBuf, name: String) -> ProjectItem {
+  pub fn new(path: PathBuf, name: String, prop: Project) -> ProjectItem {
     ProjectItem{
       path,
-      name
+      name,
+      prop
     }
   }
 }
@@ -91,7 +93,8 @@ impl SavedSolutionItem {
 
 const CS_GUID: &str = "9A19103F-16F7-4668-BE54-9A1E7A4F7556";
 const PROJECT_ITEM: &str = r#"Project("{$[a]}") = "$[b]", "$[b]\$[b].csproj", "{$[c]}"
-EndProject"#;
+EndProject
+"#;
 
 fn save_solution_item(info: &CreateProjectInfo) -> Result<(), AnyError> {
   let path = Path::new("solutions.json");
@@ -161,16 +164,30 @@ pub fn create_csproj(target_path: PathBuf, new_info:Project)->Result<(), AnyErro
   let admin = parent.join(".admin");
   let mut csproj_s:Vec<ProjectItem> = vec![];
   if !admin.exists() {
-    csproj_s.push(ProjectItem::new(target_path,new_info.property_group.assembly_title));
+    csproj_s.push(ProjectItem::new(target_path,new_info.property_group.assembly_title.clone(),new_info.clone()));
     let content = serde_json::to_string(&csproj_s)?;
     fs::write(admin,content)?;
     return Ok(());
   }
   let mut content = read_to_string(&admin)?;
   csproj_s = serde_json::from_str(&content.as_str())?;
-  csproj_s.push(ProjectItem::new(target_path,new_info.property_group.assembly_title));
+  csproj_s.push(ProjectItem::new(target_path,new_info.property_group.assembly_title.clone(),new_info.clone()));
   content = serde_json::to_string(&csproj_s)?;
   fs::write(admin,content)?;
+  Ok(())
+}
+
+pub fn add_new_project(create_project_info: CreateProjectInfo, project:Project) -> Result<(), AnyError> {
+  let solution_path = create_project_info.root.join(&create_project_info.solution_name);
+  let csproj_path = solution_path.join(&create_project_info.project_name);
+  let target_sln = solution_path.join(format!("{}.sln",&create_project_info.solution_name));
+  println!("{:#?}\n{:#?}\n{:#?}",&solution_path,&csproj_path,&target_sln);
+  fs::create_dir(&csproj_path)?;
+  create_csproj(
+    csproj_path.join(format!("{}.csproj",create_project_info.project_name)),
+    project
+  )?;
+  add_csproj_to_sln(target_sln, &create_project_info.project_name)?;
   Ok(())
 }
 
@@ -261,4 +278,15 @@ mod tests {
     assert_eq!(result.is_ok(), true)
   }
 
+  #[test]
+  fn create_new_project_test() {
+    let create_project_info = CreateProjectInfo {
+      root: PathBuf::from("target"),
+      solution_name: String::from("TestSolution"),
+      project_name: String::from("New_test"),
+    };
+    let project = Project::new(String::from("New_test"));
+    let result = add_new_project(create_project_info, project);
+    assert_eq!(result.is_ok(), true)
+  }
 }
