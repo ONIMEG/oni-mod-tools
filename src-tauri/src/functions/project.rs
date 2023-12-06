@@ -4,13 +4,14 @@ use std::{
   path::PathBuf,
   iter
 };
-use std::io::{Write};
+use std::io::{Read, Write};
 use std::path::Path;
 use anyhow::{Result, Error as AnyError, anyhow};
 use xml::reader::{EventReader, XmlEvent};
 use serde::{Deserialize, Serialize};
 use zip::ZipArchive;
 use uuid::Uuid;
+
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreateProjectInfo {
@@ -140,12 +141,7 @@ pub fn create_project(info: CreateProjectInfo) -> Result<(), AnyError> {
   content = content.replace("$[guid]", &*guid());
   fs::write(&(&target_sln), content)?;
   // 创建 csproj 项目
-  let csproj_path = solution_path.join(&info.project_name);
-  fs::create_dir(&csproj_path)?;
-  create_csproj(
-    csproj_path.join(format!("{}.csproj", info.project_name)),
-    Project::new(info.project_name.clone()))?;
-  add_csproj_to_sln(target_sln, &info.project_name)?;
+  add_new_project(&info,Project::new(info.project_name.clone()))?;
   Ok(())
 }
 
@@ -153,13 +149,18 @@ fn guid() ->String{
   return  Uuid::new_v4().as_hyphenated().to_string().to_uppercase().to_string()
 }
 
-pub fn create_csproj(target_path: PathBuf, new_info:Project)->Result<(), AnyError>{
+pub fn create_csproj(target_path: PathBuf, new_info:&Project)->Result<(), AnyError>{
   let mut new_csproj_xml = serde_xml_rs::to_string(&new_info)?;
   new_csproj_xml = format_xml(new_csproj_xml)?;
   new_csproj_xml = new_csproj_xml.replace(
     "<Project>",
     "<Project Sdk=\"Microsoft.NET.Sdk\">");
   fs::write(&target_path, new_csproj_xml)?;
+  Ok(())
+}
+
+// 添加管理文件
+fn add_admin_item(target_path: PathBuf, new_info: &Project) -> Result<(), AnyError>{
   let parent = target_path.parent().unwrap().parent().expect("没找到根目录");
   let admin = parent.join(".admin");
   let mut csproj_s:Vec<ProjectItem> = vec![];
@@ -177,7 +178,17 @@ pub fn create_csproj(target_path: PathBuf, new_info:Project)->Result<(), AnyErro
   Ok(())
 }
 
-pub fn add_new_project(create_project_info: CreateProjectInfo, project:Project) -> Result<(), AnyError> {
+// 添加 Mod.cs
+fn add_mod_cs(target_path: PathBuf, new_info: &Project) -> Result<(), AnyError>{
+  let mut file_obj = File::open("./resources/Mod.cs").expect("找不到 Mod.cs");
+  let mut code = String::new();
+  file_obj.read_to_string(&mut code).expect("读取 Mod.cs 失败");
+  code = code.replace("{assembly_title}", &new_info.property_group.assembly_title);
+  fs::write(target_path,code)?;
+  Ok(())
+}
+
+pub fn add_new_project(create_project_info: &CreateProjectInfo, project:Project) -> Result<(), AnyError> {
   let solution_path = create_project_info.root.join(&create_project_info.solution_name);
   let csproj_path = solution_path.join(&create_project_info.project_name);
   let target_sln = solution_path.join(format!("{}.sln",&create_project_info.solution_name));
@@ -185,7 +196,15 @@ pub fn add_new_project(create_project_info: CreateProjectInfo, project:Project) 
   fs::create_dir(&csproj_path)?;
   create_csproj(
     csproj_path.join(format!("{}.csproj",create_project_info.project_name)),
-    project
+    &project
+  )?;
+  add_admin_item(
+    csproj_path.join(format!("{}.csproj",create_project_info.project_name)),
+    &project
+  )?;
+  add_mod_cs(
+    csproj_path.join("Mod.cs"),
+    &project
   )?;
   add_csproj_to_sln(target_sln, &create_project_info.project_name)?;
   Ok(())
@@ -267,6 +286,7 @@ mod tests {
       project_name: String::from("test"),
     };
     let result = create_project(info);
+    print!("{:?}", result);
     assert_eq!(result.is_ok(), true)
   }
 
@@ -274,7 +294,7 @@ mod tests {
   fn create_csproj_test() {
     let project = Project ::new(String::from("test"));
     let result = create_csproj(
-      PathBuf::from("target/debug/test.csproj"),project);
+      PathBuf::from("target/debug/test.csproj"),&project);
     assert_eq!(result.is_ok(), true)
   }
 
@@ -286,7 +306,17 @@ mod tests {
       project_name: String::from("New_test"),
     };
     let project = Project::new(String::from("New_test"));
-    let result = add_new_project(create_project_info, project);
+    let result = add_new_project(&create_project_info, project);
+    print!("{:?}", result);
+    assert_eq!(result.is_ok(), true)
+  }
+
+  #[test]
+  fn add_mod_cs_test(){
+    let project = Project ::new(String::from("test"));
+    let result = add_mod_cs(
+      PathBuf::from("target/Mod.cs"),&project);
+    print!("{:?}", result);
     assert_eq!(result.is_ok(), true)
   }
 }

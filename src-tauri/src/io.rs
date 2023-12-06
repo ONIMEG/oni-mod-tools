@@ -75,7 +75,7 @@ pub fn add_new_project(json_solution_info:String, json_new_project_info:String) 
   if solution_info.is_err() || new_project_info.is_err() {
     return ResultBody::convert(CONVERT_ERROR, "转换失败");
   }
-  let result = project::add_new_project(solution_info.unwrap(), new_project_info.unwrap());
+  let result = project::add_new_project(&solution_info.unwrap(), new_project_info.unwrap());
   if !result.is_ok() {
     return ResultBody::convert(CREATE_PROJECT_ERROR, result.err().unwrap().to_string().as_str())
   }
@@ -91,7 +91,7 @@ mod tests {
   #[test]
   fn test_return_result_json(){
     let result = ResultBody::convert(SUCCESS,"success");
-    println!("{}",result)
+    assert_eq!("{\"code\":200,\"message\":\"success\"}", result);
   }
 
   #[test]
