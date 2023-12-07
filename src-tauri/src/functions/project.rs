@@ -98,7 +98,7 @@ EndProject
 "#;
 
 fn save_solution_item(info: &CreateProjectInfo) -> Result<(), AnyError> {
-  let path = Path::new("solutions.json");
+  let path = Path::new("./solutions.json");
   let mut saved_solutions:Vec<SavedSolutionItem> = vec![];
   if path.exists() {
     saved_solutions = serde_json::from_str::<Vec<SavedSolutionItem>>(&read_to_string(path)?)?;
