@@ -20,8 +20,15 @@ import {
   NSpin,
   NInputNumber,
   NModal,
+  NLayout,
+  NMenu,
+  NScrollbar,
+  NLayoutContent,
+  MenuOption, NList, NListItem,
 } from 'naive-ui';
+import {ProjectOutlined as ProjIcon} from "@vicons/antd"
 import router from '../router';
+import {renderIcon} from "../uitls/menu";
 
 const projectStore = useProjectStore();
 const solutionItem = projectStore.solutionItem;
@@ -29,7 +36,7 @@ const csproj = ref<CsprojItem[]>([]);
 const buttonLoading = ref<boolean>(false);
 const message = useMessage();
 const spinShow = ref<boolean>(false);
-const modalShow = ref<boolean>(true);
+const modalShow = ref<boolean>(false);
 const createProjectInfo = ref<Project>({
   PropertyGroup: {
     AssemblyTitle: '',
@@ -42,6 +49,14 @@ const createProjectInfo = ref<Project>({
   },
 });
 
+const menuOption = ref<MenuOption[]>()
+
+
+function handleUpdateValue (key: string, item: MenuOption) {
+  message.info('[onUpdate:value]: ' + JSON.stringify(key))
+  message.info('[onUpdate:value]: ' + JSON.stringify(item))
+}
+
 async function getCsprojListN() {
   spinShow.value = true;
   let result = await getCsprojList(solutionItem);
@@ -49,11 +64,24 @@ async function getCsprojListN() {
     message.error('读取项目失败' + result.message);
   }
   csproj.value = await JSON.parse(result.message);
+  let menuOptionsBuffer = [];
+  for (let i = 0; i < csproj.value.length; i++){
+    let newMenuOption:MenuOption = {
+      key: i,
+      label: csproj.value[i].name,
+    }
+    menuOptionsBuffer.push(newMenuOption);
+  }
+  menuOption.value = menuOptionsBuffer;
   spinShow.value = false;
 }
 
 async function back() {
-  await router.back();
+  router.back();
+}
+
+function openSelectedCsproj(item:CsprojItem){
+  console.log(item)
 }
 
 async function createProject() {
@@ -143,39 +171,23 @@ getCsprojListN();
         </n-form>
       </n-card>
     </n-modal>
-    <n-spin :show="spinShow">
-      <template v-for="(item, index) in csproj">
-        <n-card :title="item.name" size="small" style="margin-bottom: 10px">
-          <n-form size="small" label-placement="top">
-            <n-grid :cols="24" :x-gap="10">
-              <n-form-item-gi :span="8" label="名称">
-                <n-input
-                  v-model:value="item.prop.PropertyGroup.AssemblyTitle"
-                />
-              </n-form-item-gi>
-              <n-form-item-gi :span="8" label="模组版本">
-                <n-input v-model:value="item.prop.PropertyGroup.FileVersion" />
-              </n-form-item-gi>
-              <n-form-item-gi :span="8" label="最低支持版本">
-                <n-input-number
-                  v-model:value="item.prop.PropertyGroup.LastWorkingBuild"
-                />
-              </n-form-item-gi>
-              <n-form-item-gi :span="24" label="模组描述">
-                <n-input v-model:value="item.prop.PropertyGroup.Description" />
-              </n-form-item-gi>
-              <n-form-item-gi :span="24">
-                <div id="button-group">
-                  <n-button type="default">保存修改</n-button>
-                  <n-button type="success" disabled>生成</n-button>
-                  <n-button type="error" disabled>删除</n-button>
-                  <n-button type="info" disabled>发布</n-button>
-                </div>
-              </n-form-item-gi>
-            </n-grid>
-          </n-form>
-        </n-card>
-      </template>
+    <n-spin :show="spinShow" class="lists">
+      <n-list hoverable clickable>
+        <template v-for="item in csproj">
+          <n-list-item
+              class="solution-list-item"
+              @click="openSelectedCsproj(item)"
+          >
+            <div class="flex">
+              <span>{{ item.name[0] }}</span>
+              <div class="base-info">
+                <div class="title">{{ item.name }}</div>
+                <div class="path">{{ item.path }}</div>
+              </div>
+            </div>
+          </n-list-item>
+        </template>
+      </n-list>
     </n-spin>
   </div>
 </template>
@@ -184,21 +196,62 @@ getCsprojListN();
 #csproj-lists {
   padding: 10px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
-#button-group {
-  display: flex;
-  gap: 6px;
-  width: 100%;
-  justify-content: flex-end;
+.lists{
+  margin-top: 40px;
+  padding-bottom: 20px;
 }
 
 #option {
   display: flex;
   gap: 6px;
   width: 100%;
-  margin-bottom: 10px;
+  padding-top: 10px;
+  padding-left: 10px;
   padding-bottom: 10px;
   border-bottom: 1px solid #efefef;
+  position: fixed;
+  z-index: 9;
+  background: #ffffff;
+  top:0;
+  left: 0;
+}
+
+.solution-list-item {
+  padding: 10px 1rem;
+  cursor: pointer;
+}
+
+.solution-list-item .base-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-left: 10px;
+}
+
+.solution-list-item .base-info .title {
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.solution-list-item .base-info .path {
+  font-size: 0.6rem;
+  color: #858585;
+}
+
+.solution-list-item span {
+  --length: 3rem;
+  display: inline-block;
+  height: var(--length);
+  width: var(--length);
+  text-align: center;
+  line-height: var(--length);
+  border-radius: 5px;
+  background: #efefef;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 </style>
