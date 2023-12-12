@@ -1,5 +1,6 @@
 import { DefaultTheme, defineConfig } from "vitepress";
 import { sidebar } from "./sidebarConfig";
+import { getContributors } from "./theme/util";
 
 
 const socialLinks: DefaultTheme.SocialLink[] = [
@@ -11,7 +12,9 @@ export default defineConfig({
   description: "缺氧模组制作入门指南",
   lastUpdated: true,
   head: [["link", { rel: "icon", href: "/logo.png" }]],
-
+  async transformPageData(pageData, ctx) {
+    pageData.frontmatter.contributer = await getContributors(pageData.relativePath)
+  },
   themeConfig: {
     outline: { label: "目录" },
     search: {
