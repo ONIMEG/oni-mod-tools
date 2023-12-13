@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::Path;
 use serde::{Deserialize, Serialize};
-use crate::functions::{project};
+use crate::functions::{info, project};
 
 
 const SUCCESS:u16 = 200;
@@ -9,6 +9,7 @@ const CONVERT_ERROR:u16 = 500;
 const CREATE_PROJECT_ERROR:u16 = 501;
 const GET_SOLUTION_LIST_ERROR:u16 = 502;
 const GET_PROJECT_LIST_ERROR:u16 = 503;
+const GET_NEW_VERSION_ERROR:u16 = 504;
 
 #[derive(Debug,Serialize,Deserialize)]
 pub struct ResultBody{
@@ -77,11 +78,18 @@ pub fn add_new_project(json_solution_info:String, json_new_project_info:String) 
   }
   let result = project::add_new_project(&solution_info.unwrap(), new_project_info.unwrap());
   if !result.is_ok() {
-    return ResultBody::convert(CREATE_PROJECT_ERROR, result.err().unwrap().to_string().as_str())
+    return ResultBody::convert(CREATE_PROJECT_ERROR, result.err().unwrap().to_string().as_str());
   }
   return ResultBody::convert(SUCCESS,"ok");
 }
 
+pub fn get_latest_version() -> String{
+  let result = info::refresh_version();
+  if !result.is_ok() {
+    return ResultBody::convert(GET_NEW_VERSION_ERROR, result.err().unwrap().to_string().as_str());
+  }
+  return ResultBody::convert(SUCCESS, result.unwrap().to_string().as_str());
+}
 #[cfg(test)]
 mod tests {
   use std::fs;
@@ -104,5 +112,10 @@ mod tests {
     let proj_info_json = r#"{"root":"target","project_name":"ioTest","solution_name":"ioTestSolution"}"#;
     let result = create_project(proj_info_json.to_string());
     assert_eq!(result,ResultBody::convert(SUCCESS,"ok"));
+  }
+  #[test]
+  fn test_get_latest_version(){
+    let result = get_latest_version();
+    print!("{:?}",result);
   }
 }

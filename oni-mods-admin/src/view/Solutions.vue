@@ -1,18 +1,17 @@
 <script setup lang="ts">
 import { useProjectStore } from '../store/project.store';
 import {
-  CsprojItem,
   getCsprojList,
   addNewProject,
+  getLatestVersion,
+  CsprojItem,
   StatusCode,
-  Project,
+  Project, ResultBody,
 } from '../uitls/invokes';
 import { ref } from 'vue';
 import {
   useMessage,
   NCard,
-  NGrid,
-  NFormItemGi,
   NFormItem,
   NForm,
   NInput,
@@ -20,15 +19,9 @@ import {
   NSpin,
   NInputNumber,
   NModal,
-  NLayout,
-  NMenu,
-  NScrollbar,
-  NLayoutContent,
   MenuOption, NList, NListItem,
 } from 'naive-ui';
-import {ProjectOutlined as ProjIcon} from "@vicons/antd"
 import router from '../router';
-import {renderIcon} from "../uitls/menu";
 
 const projectStore = useProjectStore();
 const solutionItem = projectStore.solutionItem;
@@ -50,12 +43,6 @@ const createProjectInfo = ref<Project>({
 });
 
 const menuOption = ref<MenuOption[]>()
-
-
-function handleUpdateValue (key: string, item: MenuOption) {
-  message.info('[onUpdate:value]: ' + JSON.stringify(key))
-  message.info('[onUpdate:value]: ' + JSON.stringify(item))
-}
 
 async function getCsprojListN() {
   spinShow.value = true;
@@ -104,6 +91,16 @@ async function createProject() {
   buttonLoading.value = false;
 }
 
+async function showCreateCsProjModal(){
+  let result:ResultBody = await getLatestVersion();
+  if (result.code !== StatusCode.SUCCESS){
+    message.error(result.message);
+    return;
+  }
+  createProjectInfo.value.PropertyGroup.LastWorkingBuild = Number.parseInt(result.message);
+  modalShow.value = true;
+}
+
 getCsprojListN();
 </script>
 
@@ -114,11 +111,7 @@ getCsprojListN();
         type="primary"
         secondary
         size="small"
-        @click="
-          () => {
-            modalShow = !modalShow;
-          }
-        "
+        @click="showCreateCsProjModal"
         >新建项目</n-button
       >
       <n-button type="default" secondary @click="back" size="small"

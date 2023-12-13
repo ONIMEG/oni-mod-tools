@@ -23,13 +23,17 @@ fn add_new_project(sln: String, csproj: String) -> String{
   io::add_new_project(sln, csproj)
 }
 
+#[tauri::command]
+fn get_latest_version() -> String{io::get_latest_version()}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
           create_project,
           get_solution_list,
           get_csproj_list,
-          add_new_project
+          add_new_project,
+          get_latest_version
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

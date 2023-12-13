@@ -72,3 +72,8 @@ export async function addNewProject(
   });
   return JSON.parse(result);
 }
+
+export async function getLatestVersion(): Promise<ResultBody> {
+  const result: string = await invoke<string>('get_latest_version', {});
+  return JSON.parse(result);
+}
