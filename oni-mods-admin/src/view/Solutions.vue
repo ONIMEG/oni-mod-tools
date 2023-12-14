@@ -1,25 +1,29 @@
 <script setup lang="ts">
 import { useProjectStore } from '../store/project.store';
 import {
-  getCsprojList,
   addNewProject,
-  getLatestVersion,
   CsprojItem,
+  getCsprojList,
+  getLatestVersion,
+  Project,
+  ResultBody,
   StatusCode,
-  Project, ResultBody,
 } from '../uitls/invokes';
 import { ref } from 'vue';
 import {
-  useMessage,
-  NCard,
-  NFormItem,
-  NForm,
-  NInput,
+  MenuOption,
   NButton,
-  NSpin,
-  NInputNumber,
+  NCard,
+  NForm,
+  NFormItem,
+  NFormItemGi,
+  NGrid,
+  NInput,
+  NList,
+  NListItem,
   NModal,
-  MenuOption, NList, NListItem,
+  NSpin,
+  useMessage,
 } from 'naive-ui';
 import router from '../router';
 
@@ -30,6 +34,7 @@ const buttonLoading = ref<boolean>(false);
 const message = useMessage();
 const spinShow = ref<boolean>(false);
 const modalShow = ref<boolean>(false);
+const refreshVersionSpinShow = ref<boolean>(false);
 const createProjectInfo = ref<Project>({
   PropertyGroup: {
     AssemblyTitle: '',
@@ -73,10 +78,20 @@ function openSelectedCsproj(item:CsprojItem){
 
 async function createProject() {
   buttonLoading.value = true;
+  const entries = Object.entries(createProjectInfo.value.PropertyGroup);
+  let flag = false;
+  entries.forEach(([_, value]) => {
+    if(value == ""){
+      flag = true;
+    }
+  });
+  if (flag) {
+    message.warning("请先完成信息填写");
+    buttonLoading.value = false;
+    return;
+  }
   projectStore.createProjectInfo.project_name =
-    createProjectInfo.value.PropertyGroup.AssemblyTitle;
-  createProjectInfo.value.PropertyGroup.RootNamespace =
-    createProjectInfo.value.PropertyGroup.AssemblyTitle;
+    createProjectInfo.value.PropertyGroup.RootNamespace;
   let result = await addNewProject(
     projectStore.createProjectInfo,
     createProjectInfo.value,
@@ -91,14 +106,16 @@ async function createProject() {
   buttonLoading.value = false;
 }
 
-async function showCreateCsProjModal(){
+async function refreshVersion(){
+  refreshVersionSpinShow.value = true;
   let result:ResultBody = await getLatestVersion();
   if (result.code !== StatusCode.SUCCESS){
     message.error(result.message);
-    return;
+  } else {
+    createProjectInfo.value.PropertyGroup.LastWorkingBuild = Number.parseInt(result.message);
+    message.info("版本已更新")
   }
-  createProjectInfo.value.PropertyGroup.LastWorkingBuild = Number.parseInt(result.message);
-  modalShow.value = true;
+  refreshVersionSpinShow.value = false;
 }
 
 getCsprojListN();
@@ -111,7 +128,7 @@ getCsprojListN();
         type="primary"
         secondary
         size="small"
-        @click="showCreateCsProjModal"
+        @click="()=>{modalShow = !modalShow; refreshVersion();} "
         >新建项目</n-button
       >
       <n-button type="default" secondary @click="back" size="small"
@@ -127,22 +144,59 @@ getCsprojListN();
         role="dialog"
         aria-modal="true"
       >
-        <n-form label-placement="left" label-width="auto" size="small">
-          <n-form-item label="项目名称">
-            <n-input
-              v-model:value="createProjectInfo.PropertyGroup.AssemblyTitle"
-            />
-          </n-form-item>
-          <n-form-item label="描述">
+        <n-form label-width="auto" size="small">
+          <n-grid :cols="24" :x-gap="6">
+            <n-form-item-gi label="模组名称" span="12">
+              <n-input
+                v-model:value="createProjectInfo.PropertyGroup.AssemblyTitle"
+                placeholder="可以是中文"
+              />
+            </n-form-item-gi>
+            <n-form-item-gi label="根命名空间" span="12">
+              <n-input
+                v-model:value="createProjectInfo.PropertyGroup.RootNamespace"
+                placeholder="需要是英文"
+              />
+            </n-form-item-gi>
+          </n-grid>
+          <n-grid :cols="24" :x-gap="6">
+            <n-form-item-gi label="模组版本号" span="12">
+              <n-input
+                v-model:value="createProjectInfo.PropertyGroup.AssemblyVersion"
+                placeholder="需要符合规范"
+              />
+            </n-form-item-gi>
+            <n-form-item-gi label="文件版本号" span="12">
+              <n-input
+                v-model:value="createProjectInfo.PropertyGroup.FileVersion"
+                placeholder="需要符合规范"
+              />
+            </n-form-item-gi>
+          </n-grid>
+          <n-form-item label="模组描述">
             <n-input
               v-model:value="createProjectInfo.PropertyGroup.Description"
+              placeholder="尽量简短"
+              type="textarea"
             />
           </n-form-item>
-          <n-form-item label="最低支持版本">
-            <n-input-number
-              v-model:value="createProjectInfo.PropertyGroup.LastWorkingBuild"
-            />
-          </n-form-item>
+          <n-grid :cols="24" :x-gap="20">
+            <n-form-item-gi label="最低支持版本" span="12">
+              <n-spin style="width: 100%" :size="'small'" :show="refreshVersionSpinShow">
+                <div id="latest-version">
+                  <span>{{createProjectInfo.PropertyGroup.LastWorkingBuild}}</span>
+                  <n-button
+                    type="primary"
+                    @click="refreshVersion"
+                    :loading="buttonLoading"
+                  >刷新</n-button>
+                </div>
+              </n-spin>
+            </n-form-item-gi>
+            <n-form-item-gi label="平台" span="12">
+              <span>{{createProjectInfo.PropertyGroup.Platforms}}</span>
+            </n-form-item-gi>
+          </n-grid>
           <n-form-item class="flex flex-end">
             <n-button
               type="primary"
@@ -186,6 +240,12 @@ getCsprojListN();
 </template>
 
 <style scoped>
+#latest-version{
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
 #csproj-lists {
   padding: 10px;
   box-sizing: border-box;
