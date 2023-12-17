@@ -41,6 +41,10 @@ type Property = {
   Platforms: string;
 };
 
+type ConfigInfo = {
+  latest_version: string;
+}
+
 export async function createProject(
   infoJ: CreateProjectInfo,
 ): Promise<ResultBody> {
@@ -74,6 +78,11 @@ export async function addNewProject(
 }
 
 export async function getLatestVersion(): Promise<ResultBody> {
-  const result: string = await invoke<string>('get_latest_version', {});
+  const result: string = await invoke<string>('refresh_version', {});
+  return JSON.parse(result);
+}
+
+export async function getConfigInfo(): Promise<ResultBody> {
+  const result: string = await invoke<string>('get_config_info', {});
   return JSON.parse(result);
 }

@@ -40,7 +40,7 @@ pub fn refresh_version() -> Result<u32, AnyError> {
     Ok(latest_version)
 }
 
-fn load_config_file() -> Result<ConfigInfo, AnyError>{
+pub fn load_config_file() -> Result<ConfigInfo, AnyError>{
     let config_path = Path::new("./config.json");
     let mut config_info = ConfigInfo{
         latest_version: 526233,

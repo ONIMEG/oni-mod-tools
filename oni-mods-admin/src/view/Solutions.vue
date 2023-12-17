@@ -5,6 +5,7 @@ import {
   CsprojItem,
   getCsprojList,
   getLatestVersion,
+  getConfigInfo,
   Project,
   ResultBody,
   StatusCode,
@@ -118,6 +119,17 @@ async function refreshVersion(){
   refreshVersionSpinShow.value = false;
 }
 
+async function getConfigVersion(){
+  refreshVersionSpinShow.value = true;
+  let result:ResultBody = await getConfigInfo();
+  if (result.code !== StatusCode.SUCCESS){
+    message.error(result.message);
+  } else {
+    let msg = JSON.parse(result.message)
+    createProjectInfo.value.PropertyGroup.LastWorkingBuild = Number.parseInt(msg.latest_version);
+  }
+  refreshVersionSpinShow.value = false;
+}
 getCsprojListN();
 </script>
 
@@ -128,7 +140,7 @@ getCsprojListN();
         type="primary"
         secondary
         size="small"
-        @click="()=>{modalShow = !modalShow; refreshVersion();} "
+        @click="()=>{modalShow = !modalShow; getConfigVersion();} "
         >新建项目</n-button
       >
       <n-button type="default" secondary @click="back" size="small"

@@ -24,7 +24,10 @@ fn add_new_project(sln: String, csproj: String) -> String{
 }
 
 #[tauri::command]
-fn get_latest_version() -> String{io::get_latest_version()}
+fn refresh_version() -> String{io::refresh_version()}
+
+#[tauri::command]
+fn get_config_info() -> String{io::get_config_info()}
 
 fn main() {
     tauri::Builder::default()
@@ -33,7 +36,8 @@ fn main() {
           get_solution_list,
           get_csproj_list,
           add_new_project,
-          get_latest_version
+          refresh_version,
+          get_config_info
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1909,6 +1909,7 @@ dependencies = [
  "tauri",
  "tauri-build",
  "uuid",
+ "walkdir",
  "xml-rs",
  "zip",
 ]

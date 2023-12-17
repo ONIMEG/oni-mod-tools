@@ -10,6 +10,7 @@ const CREATE_PROJECT_ERROR:u16 = 501;
 const GET_SOLUTION_LIST_ERROR:u16 = 502;
 const GET_PROJECT_LIST_ERROR:u16 = 503;
 const GET_NEW_VERSION_ERROR:u16 = 504;
+const READ_CONFIG_INFO_ERROE:u16 = 505;
 
 #[derive(Debug,Serialize,Deserialize)]
 pub struct ResultBody{
@@ -63,7 +64,7 @@ pub fn get_project_list(json_solution_item:String) -> String{
   if !solution_item.is_ok() {
     return ResultBody::convert(CONVERT_ERROR, solution_item.err().unwrap().to_string().as_str())
   }
-  let result = project::get_csproj_list(solution_item.unwrap());
+  let result = project::get_csproj_list_var_buffer(solution_item.unwrap());
   if  !result.is_ok() {
     return ResultBody::convert(GET_PROJECT_LIST_ERROR, result.err().unwrap().to_string().as_str())
   }
@@ -83,13 +84,22 @@ pub fn add_new_project(json_solution_info:String, json_new_project_info:String) 
   return ResultBody::convert(SUCCESS,"ok");
 }
 
-pub fn get_latest_version() -> String{
+pub fn refresh_version() -> String{
   let result = info::refresh_version();
   if !result.is_ok() {
     return ResultBody::convert(GET_NEW_VERSION_ERROR, result.err().unwrap().to_string().as_str());
   }
   return ResultBody::convert(SUCCESS, result.unwrap().to_string().as_str());
 }
+
+pub fn get_config_info() -> String{
+  let result = info::load_config_file();
+  if !result.is_ok() {
+    return ResultBody::convert(READ_CONFIG_INFO_ERROE,  result.err().unwrap().to_string().as_str());
+  }
+  return ResultBody::convert(SUCCESS, serde_json::to_string(&result.unwrap()).unwrap().as_str());
+}
+
 #[cfg(test)]
 mod tests {
   use std::fs;
@@ -115,7 +125,12 @@ mod tests {
   }
   #[test]
   fn test_get_latest_version(){
-    let result = get_latest_version();
+    let result = refresh_version();
+    print!("{:?}",result);
+  }
+  #[test]
+  fn test_get_config_info(){
+    let result = get_config_info();
     print!("{:?}",result);
   }
 }

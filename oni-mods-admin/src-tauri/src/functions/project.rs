@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::{
   fs::{self, File, OpenOptions, read_to_string},
   io::{BufReader, BufWriter},
@@ -5,12 +6,13 @@ use std::{
   iter
 };
 use std::io::{Read, Write};
-use std::path::Path;
 use anyhow::{Result, Error as AnyError, anyhow};
 use xml::reader::{EventReader, XmlEvent};
 use serde::{Deserialize, Serialize};
+
 use zip::ZipArchive;
 use uuid::Uuid;
+
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -263,9 +265,15 @@ fn format_xml(xml_string: String) -> Result<String, AnyError> {
   Ok(formatted_xml)
 }
 
-pub fn get_csproj_list(solution_item: SavedSolutionItem) -> Result<String, AnyError> {
+pub fn get_csproj_list_var_buffer(solution_item: SavedSolutionItem) -> Result<String, AnyError> {
   let admin = solution_item.path.join(solution_item.name).join(".admin");
   return Ok(read_to_string(admin)?);
+}
+
+pub fn update_csproj_info(new_csproj_info:ProjectItem)->Result<(),AnyError>{
+  let csproj:Project = serde_xml_rs::from_str(&*read_to_string(new_csproj_info.path)?)?;
+  print!("{:?}",csproj);
+  Ok(())
 }
 
 #[cfg(test)]
@@ -318,5 +326,15 @@ mod tests {
       PathBuf::from("target/Mod.cs"),&project);
     print!("{:?}", result);
     assert_eq!(result.is_ok(), true)
+  }
+
+  #[test]
+  fn test_update_csproj_info(){
+    let proj:ProjectItem = ProjectItem{
+      name: String::from("ss"),
+      path: PathBuf::new().join("target/ioTestSolution/ioTest/ioTest.csproj"),
+      prop: Project ::new(String::from("test")),
+    };
+    update_csproj_info(proj).expect("TODO: panic message");
   }
 }
