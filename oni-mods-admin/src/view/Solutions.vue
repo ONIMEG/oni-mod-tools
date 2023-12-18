@@ -74,7 +74,8 @@ async function back() {
 }
 
 function openSelectedCsproj(item:CsprojItem){
-  console.log(item)
+  projectStore.currentCsProjInfo = item;
+  router.push('/csproj');
 }
 
 async function createProject() {

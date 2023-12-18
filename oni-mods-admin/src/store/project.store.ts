@@ -1,11 +1,16 @@
 import { defineStore } from 'pinia';
-import { CreateProjectInfo, SolutionItem } from '../uitls/invokes';
+import {
+  CreateProjectInfo,
+  CsprojItem,
+  SolutionItem,
+} from '../uitls/invokes';
 
 export const useProjectStore = defineStore({
   id: 'project',
   state: (): {
     createProjectInfo: CreateProjectInfo;
     solutionItem: SolutionItem;
+    currentCsProjInfo: CsprojItem;
   } => ({
     createProjectInfo: {
       root: 'usr/join',
@@ -15,6 +20,21 @@ export const useProjectStore = defineStore({
     solutionItem: {
       name: '',
       path: '',
+    },
+    currentCsProjInfo: {
+      name: '',
+      path: '',
+      prop: {
+        PropertyGroup: {
+          AssemblyTitle: '',
+          FileVersion: '1.0.0',
+          RootNamespace: '',
+          Description: '',
+          AssemblyVersion: '1.0.0',
+          LastWorkingBuild: 526233,
+          Platforms: 'Vanilla;Mergedown',
+        },
+      },
     },
   }),
 });
