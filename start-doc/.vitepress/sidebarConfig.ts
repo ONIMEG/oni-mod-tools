@@ -22,7 +22,7 @@ export const sidebar: DefaultTheme.SidebarItem[] = [
     ],
   },
   {
-    text: "第 2 章 开始一个项目",
+    text: "第 2 章 模组制作流程",
     collapsed: true,
     items: [
       {text: "2.1 游戏文件", link: "/2/2_1_rela_files.md"},
@@ -30,4 +30,11 @@ export const sidebar: DefaultTheme.SidebarItem[] = [
       {text: "2.3 项目生成、测试以及上传", link: "/2/2_3_budle.md"}
     ]
   },
+  {
+    text: "第三章 完整模组演示",
+    collapsed: true,
+    items: [
+      {text: "3.1 新增一个建筑", link: "/3/3_1_new_building.md"}
+    ]
+  }
 ];
