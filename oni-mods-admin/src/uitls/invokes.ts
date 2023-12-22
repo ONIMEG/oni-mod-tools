@@ -41,8 +41,9 @@ type Property = {
   Platforms: string;
 };
 
-type ConfigInfo = {
+export type ConfigInfo = {
   latest_version: string;
+  github_token: string;
 }
 
 export async function createProject(
@@ -85,4 +86,10 @@ export async function getLatestVersion(): Promise<ResultBody> {
 export async function getConfigInfo(): Promise<ResultBody> {
   const result: string = await invoke<string>('get_config_info', {});
   return JSON.parse(result);
+}
+
+export async function updateConfigInfo(configInfo: ConfigInfo): Promise<ResultBody> {
+  const info: string = JSON.stringify(configInfo);
+  const result: string = await invoke<string>('update_config_info', {info})
+  return  JSON.parse(result)
 }

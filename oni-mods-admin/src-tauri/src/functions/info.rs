@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ConfigInfo {
     pub latest_version: u32,
+    pub github_token: String
 }
 
 fn get_latest_version() -> Result<u32,AnyError>{
@@ -44,6 +45,7 @@ pub fn load_config_file() -> Result<ConfigInfo, AnyError>{
     let config_path = Path::new("./config.json");
     let mut config_info = ConfigInfo{
         latest_version: 526233,
+        github_token: String::from("NULL")
     };
     if config_path.exists() {
         config_info = serde_json::from_str::<ConfigInfo>(&read_to_string(config_path)?)?;
@@ -53,7 +55,7 @@ pub fn load_config_file() -> Result<ConfigInfo, AnyError>{
     Ok(config_info)
 }
 
-fn save_config_file(config_info:&ConfigInfo) -> Result<(), AnyError>{
+pub fn save_config_file(config_info:&ConfigInfo) -> Result<(), AnyError>{
     let config_path = Path::new("./config.json");
     let content = serde_json::to_string(&config_info)?;
     fs::write(config_path, &content)?;
@@ -69,6 +71,7 @@ mod test{
         let config_info = load_config_file();
         let new_config_info = ConfigInfo{
             latest_version: 222,
+            github_token: String::from("NULL")
         };
         let result = save_config_file(&new_config_info);
         print!("{:?}{:?}", config_info, result);

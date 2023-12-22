@@ -12,7 +12,7 @@ import {
   ResultBody,
   SolutionItem,
 } from '../uitls/invokes';
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 
 const message = useMessage();
 const projectInfo = useProjectStore();
@@ -65,7 +65,6 @@ async function open() {
     message.warning('请选择单个目录');
     return;
   }
-  console.log(path);
 }
 
 getSolutionList();
@@ -115,6 +114,16 @@ getSolutionList();
         </n-list-item>
       </n-list>
     </div>
+    <div class="setting-button">
+      <n-button
+        @click="
+        () => {
+          router.push('/setting');
+        }
+      "
+      >设置</n-button
+      >
+    </div>
   </div>
   <div v-else>
     <div id="create-nav">
@@ -139,10 +148,26 @@ getSolutionList();
         </n-list-item>
       </template>
     </n-list>
+    <div class="setting-button">
+      <n-button
+        @click="
+        () => {
+          router.push('/setting');
+        }
+      "
+      >设置</n-button
+      >
+    </div>
   </div>
 </template>
 
 <style scoped>
+.setting-button {
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+}
+
 .solution-list-item {
   padding: 10px 1rem;
   cursor: pointer;

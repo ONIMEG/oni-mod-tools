@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::Path;
 use serde::{Deserialize, Serialize};
+use tauri::Config;
 use crate::functions::{info, project};
 
 
@@ -98,6 +99,18 @@ pub fn get_config_info() -> String{
     return ResultBody::convert(READ_CONFIG_INFO_ERROE,  result.err().unwrap().to_string().as_str());
   }
   return ResultBody::convert(SUCCESS, serde_json::to_string(&result.unwrap()).unwrap().as_str());
+}
+
+pub fn update_config_info(new_config_info: String) -> String{
+  let config_info:Result<info::ConfigInfo,_> = serde_json::from_str(new_config_info.as_str());
+  if config_info.is_err(){
+    return ResultBody::convert(CONVERT_ERROR, "转换失败")
+  }
+  let result = info::save_config_file(&config_info.unwrap());
+  if result.is_err() {
+    return ResultBody::convert(READ_CONFIG_INFO_ERROE,  result.err().unwrap().to_string().as_str());
+  }
+  return ResultBody::convert(SUCCESS, "保存配置成功");
 }
 
 #[cfg(test)]

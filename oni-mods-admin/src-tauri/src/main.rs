@@ -29,6 +29,9 @@ fn refresh_version() -> String{io::refresh_version()}
 #[tauri::command]
 fn get_config_info() -> String{io::get_config_info()}
 
+#[tauri::command]
+fn update_config_info(info: String) -> String{io::update_config_info(info)}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
@@ -37,7 +40,8 @@ fn main() {
           get_csproj_list,
           add_new_project,
           refresh_version,
-          get_config_info
+          get_config_info,
+          update_config_info
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
