@@ -31,10 +31,11 @@ export const sidebar: DefaultTheme.SidebarItem[] = [
     ]
   },
   {
-    text: "第三章 完整模组演示",
+    text: "第 3 章 完整模组演示",
     collapsed: true,
     items: [
-      {text: "3.1 新增一个建筑", link: "/3/3_1_new_building.md"}
+      {text: "3.1 新增一个建筑", link: "/3/3_1_new_building.md"},
+      {text: "3.2 对现有建筑进行修改", link: "/start-doc/3/3_2_modify_buildings.md"}
     ]
   }
 ];
