@@ -1,7 +1,6 @@
 use std::fs;
 use std::path::Path;
 use serde::{Deserialize, Serialize};
-use tauri::Config;
 use crate::functions::{info, project};
 
 
