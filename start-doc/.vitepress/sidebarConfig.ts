@@ -36,7 +36,8 @@ export const sidebar: DefaultTheme.SidebarItem[] = [
     items: [
       {text: "3.1 新增一个建筑", link: "/3/3_1_new_building.md"},
       {text: "3.2 对现有建筑进行修改", link: "/3/3_2_modify_buildings.md"},
-      {text: "3.3 修改详情菜单", link: "/3/3_3_modify_detail_menu.md"}
+      {text: "3.3 修改详情菜单", link: "/3/3_3_modify_detail_menu.md"},
+      {text: "3.4 模组多语言设置", link: '/3/3_4_mod_il8n.md'}
     ]
   }
 ];
