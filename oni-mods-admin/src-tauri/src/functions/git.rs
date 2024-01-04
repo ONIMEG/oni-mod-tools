@@ -1,8 +1,9 @@
-use std::path::{Path, PathBuf};
+use std::path::{PathBuf};
 use anyhow::{Error as AnyError};
-use git2::{Repository, Status, StatusOptions};
+use git2::{Repository, StatusOptions};
 use Result::Ok;
 use serde::{Deserialize, Serialize};
+
 
 
 pub const GIT_REPO_NOT_EXIST:u16 = 100;
@@ -13,27 +14,15 @@ pub struct StatuesItem {
     new_path: String
 }
 pub fn is_repo_exist(path: PathBuf) -> Result<String, AnyError> {
-    let repo = Repository::open(path);
-    return if repo.is_err() {
-        Err(AnyError::msg("仓库不存在"))
-    } else {
-        Ok(String::from("仓库存在"))
-    }
+    let _repo = Repository::open(path)?;
+    Ok(String::from("仓库存在"))
 }
 
 pub fn get_statuses(path: PathBuf) -> Result<Vec<StatuesItem>, AnyError>{
-    let repo = Repository::open(path);
-    if repo.is_err() {
-        return Err(AnyError::msg("仓库不存在"))
-    }
-    let repo = repo.unwrap();
+    let repo = Repository::open(path)?;
     let mut opt = StatusOptions::new();
     opt.include_untracked(true);
-    let statuses = repo.statuses(Some(&mut opt));
-    if statuses.is_err() {
-        return Err(AnyError::msg("读取状态失败"))
-    }
-    let statuses = statuses.unwrap();
+    let statuses = repo.statuses(Some(&mut opt))?;
     let mut status_list:Vec<StatuesItem> =Vec::new() ;
     for entry in statuses.iter() {
         if entry.index_to_workdir().is_none() {
@@ -61,6 +50,24 @@ pub fn get_statuses(path: PathBuf) -> Result<Vec<StatuesItem>, AnyError>{
     Ok(status_list)
 }
 
+pub fn add_to_commit(path: PathBuf) -> Result<(),AnyError>{
+    let repo = Repository::open(path.clone())?;
+    let mut index = repo.index()?;
+    let states:Vec<StatuesItem> = get_statuses(path.clone())?;
+    let mut need_add:Vec<String> = Vec::new();
+    let mut need_update:Vec<String> = Vec::new();
+    for item in states{
+        match item {
+            i if i.status_type == 2 => need_add.push(i.new_path),
+            _ => need_update.push(item.new_path)
+        }
+    }
+    index.add_all(need_add.iter(), git2::IndexAddOption::DEFAULT, None)?;
+    index.update_all(need_update.iter(),None)?;
+    index.write()?;
+    Ok(())
+}
+
 
 mod test{
     use super::*;
@@ -74,10 +81,15 @@ mod test{
         print!("{:?}", result);
         assert_eq!(result.is_err(), true);
     }
-
     #[test]
     fn test_statues(){
         let result = get_statuses(PathBuf::new().join("C:\\Users\\26216\\code\\CSharp\\ONI-Mods"));
+        print!("{:?}", result);
+        assert_eq!(result.is_ok(), true);
+    }
+    #[test]
+    fn test_add(){
+        let result = add_to_commit(PathBuf::new().join("C:\\Users\\26216\\code\\Others\\test_for_rs_git"));
         print!("{:?}", result);
         assert_eq!(result.is_ok(), true);
     }
