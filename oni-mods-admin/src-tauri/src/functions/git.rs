@@ -3,7 +3,7 @@ use anyhow::{Error as AnyError};
 use git2::{Repository, StatusOptions};
 use Result::Ok;
 use serde::{Deserialize, Serialize};
-
+use tauri::api::dialog::message;
 
 
 pub const GIT_REPO_NOT_EXIST:u16 = 100;
@@ -68,10 +68,24 @@ pub fn add_to_commit(path: PathBuf) -> Result<(),AnyError>{
     Ok(())
 }
 
+pub fn commit_change(repo_path: PathBuf, msg: &str) -> Result<(),AnyError>{
+    let repo = Repository::open(repo_path.clone())?;
+    let states:Vec<StatuesItem> = get_statuses(repo_path.clone())?;
+    if !states.is_empty() {
+        add_to_commit(repo_path.clone())?;
+    }
+    let sig = repo.signature()?;
+    let tree_id = {
+        let mut index = repo.index()?;
+        index.write_tree()?
+    };
+    let tree = repo.find_tree(tree_id)?;
+    repo.commit(Some("HEAD"),&sig,&sig,msg,&tree,&[])?;
+    Ok(())
+}
 
 mod test{
     use super::*;
-
     #[test]
     fn test_repo(){
         let result = is_repo_exist(PathBuf::new().join("C:\\Users\\26216\\code\\CSharp\\ONI-Mods"));
@@ -90,6 +104,13 @@ mod test{
     #[test]
     fn test_add(){
         let result = add_to_commit(PathBuf::new().join("C:\\Users\\26216\\code\\Others\\test_for_rs_git"));
+        print!("{:?}", result);
+        assert_eq!(result.is_ok(), true);
+    }
+
+    #[test]
+    fn test_commit(){
+        let result = commit_change(PathBuf::new().join("C:\\Users\\26216\\code\\Others\\test_for_rs_git"),"test commit");
         print!("{:?}", result);
         assert_eq!(result.is_ok(), true);
     }
