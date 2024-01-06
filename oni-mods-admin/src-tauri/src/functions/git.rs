@@ -1,6 +1,6 @@
 use std::path::{PathBuf};
 use anyhow::{Error as AnyError};
-use git2::{Repository, StatusOptions};
+use git2::{Remote, Repository, StatusOptions};
 use Result::Ok;
 use serde::{Deserialize, Serialize};
 use tauri::api::dialog::message;
@@ -82,6 +82,11 @@ pub fn commit_change(repo_path: PathBuf, msg: &str) -> Result<(),AnyError>{
     let tree = repo.find_tree(tree_id)?;
     repo.commit(Some("HEAD"),&sig,&sig,msg,&tree,&[])?;
     Ok(())
+}
+
+pub fn add_remote(repo_path:PathBuf, name:&str, url:&str) -> Result<(), AnyError>{
+    let repo = Repository::open(repo_path)?;
+    let _remote = repo.remote(name, url)?;
 }
 
 mod test{
