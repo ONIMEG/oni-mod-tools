@@ -26,7 +26,7 @@ async function back() {
   }else {
     message.error(result.message)
   }
-  router.back();
+  await router.push("/");
 }
 getLocalConfig();
 </script>

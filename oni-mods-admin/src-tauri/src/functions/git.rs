@@ -87,6 +87,7 @@ pub fn commit_change(repo_path: PathBuf, msg: &str) -> Result<(),AnyError>{
 pub fn add_remote(repo_path:PathBuf, name:&str, url:&str) -> Result<(), AnyError>{
     let repo = Repository::open(repo_path)?;
     let _remote = repo.remote(name, url)?;
+    Ok(())
 }
 
 mod test{

@@ -148,25 +148,10 @@ getSolutionList();
         </n-list-item>
       </template>
     </n-list>
-    <div class="setting-button">
-      <n-button
-        @click="
-        () => {
-          router.push('/setting');
-        }
-      "
-      >设置</n-button
-      >
-    </div>
   </div>
 </template>
 
 <style scoped>
-.setting-button {
-  position: fixed;
-  right: 10px;
-  bottom: 10px;
-}
 
 .solution-list-item {
   padding: 10px 1rem;
