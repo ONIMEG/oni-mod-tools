@@ -130,7 +130,6 @@ getSolutionList();
       <n-button strong secondary type="primary" @click="create">
         新建
       </n-button>
-      <n-button strong secondary @click="open"> 打开 </n-button>
     </div>
     <n-list hoverable clickable>
       <template v-for="item in solutionList">

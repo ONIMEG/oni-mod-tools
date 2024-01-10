@@ -70,11 +70,6 @@ async function back() {
   router.back();
 }
 
-function openSelectedCsproj(item:CsprojItem){
-  projectStore.currentCsProjInfo = item;
-  router.push('/csproj');
-}
-
 async function createProject() {
   buttonLoading.value = true;
   const entries = Object.entries(createProjectInfo.value.PropertyGroup);
@@ -128,6 +123,7 @@ async function getConfigVersion(){
   }
   refreshVersionSpinShow.value = false;
 }
+getConfigVersion()
 getCsprojListN();
 </script>
 
@@ -206,37 +202,9 @@ getCsprojListN();
               :loading="buttonLoading"
               >确认</n-button
             >
-            <n-button
-              type="default"
-              @click="
-                () => {
-                  modalShow = !modalShow;
-                }
-              "
-              >取消</n-button
-            >
           </n-form-item>
         </n-form>
       </n-card>
-
-<!--    <n-spin :show="spinShow" class="lists">-->
-<!--      <n-list hoverable clickable>-->
-<!--        <template v-for="item in csproj">-->
-<!--          <n-list-item-->
-<!--              class="solution-list-item"-->
-<!--              @click="openSelectedCsproj(item)"-->
-<!--          >-->
-<!--            <div class="flex">-->
-<!--              <span>{{ item.name[0] }}</span>-->
-<!--              <div class="base-info">-->
-<!--                <div class="title">{{ item.name }}</div>-->
-<!--                <div class="path">{{ item.path }}</div>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          </n-list-item>-->
-<!--        </template>-->
-<!--      </n-list>-->
-<!--    </n-spin>-->
   </div>
 </template>
 
