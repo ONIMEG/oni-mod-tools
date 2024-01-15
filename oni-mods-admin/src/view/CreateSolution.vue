@@ -93,7 +93,7 @@ async function create(e: MouseEvent) {
       label-placement="left"
       label-width="auto"
       ref="formRef"
-      style="width: 100%"
+      style="width: 60vw"
     >
       <n-form-item label="解决方案位置">
         <n-input
@@ -103,7 +103,7 @@ async function create(e: MouseEvent) {
         />
       </n-form-item>
       <n-form-item
-        label="项目名"
+        label="模组名称"
         :validation-status="
           computed(() => {
             return createStatus(formInfo.project_name);
@@ -146,6 +146,7 @@ async function create(e: MouseEvent) {
 .form {
   padding: 1rem 2rem;
   height: 100vh;
+  box-sizing: border-box;
 }
 
 .title {

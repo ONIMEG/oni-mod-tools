@@ -26,6 +26,12 @@
       "active": true,
       "targets": "all",
       "identifier": "com.onimeg.www",
+      "windows": {
+        "wix":{
+          "language": "zh-CN"
+        },
+        "digestAlgorithm": "sha256"
+      },
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -45,7 +51,7 @@
         "fullscreen": false,
         "resizable": false,
         "maximized": false,
-        "title": "缺氧模组管理系统",
+        "title": "缺氧项目创建器",
         "width": 800,
         "height": 600
       }
