@@ -1,9 +1,5 @@
 import { defineStore } from 'pinia';
-import {
-  CreateProjectInfo,
-  CsprojItem,
-  SolutionItem,
-} from '../uitls/invokes';
+import { CreateProjectInfo, CsprojItem, SolutionItem } from '../uitls/invokes';
 
 export const useProjectStore = defineStore({
   id: 'project',

@@ -2,13 +2,13 @@
 import { useProjectStore } from '../store/project.store';
 import {
   addNewProject,
-  CsprojItem,
   getCsprojList,
   getLatestVersion,
   getConfigInfo,
   Project,
+  CsprojItem,
   ResultBody,
-  StatusCode,
+  StatusCode, gitStatues,
 } from '../uitls/invokes';
 import { ref } from 'vue';
 import {
@@ -25,6 +25,7 @@ import {
 } from 'naive-ui';
 import router from '../router';
 
+const showGitButton = ref<boolean>(true);
 const projectStore = useProjectStore();
 const solutionItem = projectStore.solutionItem;
 const csproj = ref<CsprojItem[]>([]);
@@ -45,7 +46,7 @@ const createProjectInfo = ref<Project>({
   },
 });
 
-const menuOption = ref<MenuOption[]>()
+const menuOption = ref<MenuOption[]>();
 
 async function getCsprojListN() {
   spinShow.value = true;
@@ -55,11 +56,11 @@ async function getCsprojListN() {
   }
   csproj.value = await JSON.parse(result.message);
   let menuOptionsBuffer = [];
-  for (let i = 0; i < csproj.value.length; i++){
-    let newMenuOption:MenuOption = {
+  for (let i = 0; i < csproj.value.length; i++) {
+    let newMenuOption: MenuOption = {
       key: i,
       label: csproj.value[i].name,
-    }
+    };
     menuOptionsBuffer.push(newMenuOption);
   }
   menuOption.value = menuOptionsBuffer;
@@ -75,12 +76,12 @@ async function createProject() {
   const entries = Object.entries(createProjectInfo.value.PropertyGroup);
   let flag = false;
   entries.forEach(([_, value]) => {
-    if(value == ""){
+    if (value == '') {
       flag = true;
     }
   });
   if (flag) {
-    message.warning("请先完成信息填写");
+    message.warning('请先完成信息填写');
     buttonLoading.value = false;
     return;
   }
@@ -100,31 +101,47 @@ async function createProject() {
   buttonLoading.value = false;
 }
 
-async function refreshVersion(){
+async function refreshVersion() {
   refreshVersionSpinShow.value = true;
-  let result:ResultBody = await getLatestVersion();
-  if (result.code !== StatusCode.SUCCESS){
+  let result: ResultBody = await getLatestVersion();
+  if (result.code !== StatusCode.SUCCESS) {
     message.error(result.message);
   } else {
-    createProjectInfo.value.PropertyGroup.LastWorkingBuild = Number.parseInt(result.message);
-    message.info("版本已更新")
+    createProjectInfo.value.PropertyGroup.LastWorkingBuild = Number.parseInt(
+      result.message,
+    );
+    message.info('版本已更新');
   }
   refreshVersionSpinShow.value = false;
 }
 
-async function getConfigVersion(){
+async function getConfigVersion() {
   refreshVersionSpinShow.value = true;
-  let result:ResultBody = await getConfigInfo();
-  if (result.code !== StatusCode.SUCCESS){
+  let result: ResultBody = await getConfigInfo();
+  if (result.code !== StatusCode.SUCCESS) {
     message.error(result.message);
   } else {
-    let msg = JSON.parse(result.message)
-    createProjectInfo.value.PropertyGroup.LastWorkingBuild = Number.parseInt(msg.latest_version);
+    let msg = JSON.parse(result.message);
+    createProjectInfo.value.PropertyGroup.LastWorkingBuild = Number.parseInt(
+      msg.latest_version,
+    );
   }
   refreshVersionSpinShow.value = false;
 }
-getConfigVersion()
+
+async function getGitStatues(){
+  let result = await gitStatues(`${projectStore.solutionItem.path}\\${projectStore.solutionItem.name}`);
+  if (result.code !== StatusCode.SUCCESS) {
+    message.error(result.message);
+  } else {
+    let msg = JSON.parse(result.message);
+    console.log(msg)
+  }
+}
+
+getConfigVersion();
 getCsprojListN();
+getGitStatues();
 </script>
 
 <template>
@@ -134,82 +151,114 @@ getCsprojListN();
         >返回</n-button
       >
     </div>
-      <n-card
-        style="width: 750px"
-        title="新建项目"
-        :bordered="false"
-        size="huge"
-        aria-modal="true"
-      >
-        <n-form label-width="auto" size="small">
-          <n-grid :cols="24" :x-gap="6">
-            <n-form-item-gi label="模组名称" span="12">
-              <n-input
-                v-model:value="createProjectInfo.PropertyGroup.AssemblyTitle"
-                placeholder="可以是中文"
-              />
-            </n-form-item-gi>
-            <n-form-item-gi label="根命名空间" span="12">
-              <n-input
-                v-model:value="createProjectInfo.PropertyGroup.RootNamespace"
-                placeholder="需要是英文"
-              />
-            </n-form-item-gi>
-          </n-grid>
-          <n-grid :cols="24" :x-gap="6">
-            <n-form-item-gi label="模组版本号" span="12">
-              <n-input
-                v-model:value="createProjectInfo.PropertyGroup.AssemblyVersion"
-                placeholder="需要符合规范"
-              />
-            </n-form-item-gi>
-            <n-form-item-gi label="文件版本号" span="12">
-              <n-input
-                v-model:value="createProjectInfo.PropertyGroup.FileVersion"
-                placeholder="需要符合规范"
-              />
-            </n-form-item-gi>
-          </n-grid>
-          <n-form-item label="模组描述">
+    <n-card
+      style="width: 750px"
+      title="新建项目"
+      :bordered="false"
+      size="huge"
+      aria-modal="true"
+    >
+      <n-form label-width="auto" size="small">
+        <n-grid :cols="24" :x-gap="6">
+          <n-form-item-gi label="模组名称" span="12">
             <n-input
-              v-model:value="createProjectInfo.PropertyGroup.Description"
-              placeholder="尽量简短"
-              type="textarea"
+              v-model:value="createProjectInfo.PropertyGroup.AssemblyTitle"
+              placeholder="可以是中文"
             />
-          </n-form-item>
-          <n-grid :cols="24" :x-gap="20">
-            <n-form-item-gi label="最低支持版本" span="12">
-              <n-spin style="width: 100%" :size="'small'" :show="refreshVersionSpinShow">
-                <div id="latest-version">
-                  <span>{{createProjectInfo.PropertyGroup.LastWorkingBuild}}</span>
-                  <n-button
-                    type="primary"
-                    @click="refreshVersion"
-                    :loading="buttonLoading"
-                  >刷新</n-button>
-                </div>
-              </n-spin>
-            </n-form-item-gi>
-            <n-form-item-gi label="平台" span="12">
-              <span>{{createProjectInfo.PropertyGroup.Platforms}}</span>
-            </n-form-item-gi>
-          </n-grid>
-          <n-form-item class="flex flex-end">
-            <n-button
-              type="primary"
-              style="margin-right: 6px"
-              @click="createProject"
-              :loading="buttonLoading"
-              >确认</n-button
+          </n-form-item-gi>
+          <n-form-item-gi label="根命名空间" span="12">
+            <n-input
+              v-model:value="createProjectInfo.PropertyGroup.RootNamespace"
+              placeholder="需要是英文"
+            />
+          </n-form-item-gi>
+        </n-grid>
+        <n-grid :cols="24" :x-gap="6">
+          <n-form-item-gi label="模组版本号" span="12">
+            <n-input
+              v-model:value="createProjectInfo.PropertyGroup.AssemblyVersion"
+              placeholder="需要符合规范"
+            />
+          </n-form-item-gi>
+          <n-form-item-gi label="文件版本号" span="12">
+            <n-input
+              v-model:value="createProjectInfo.PropertyGroup.FileVersion"
+              placeholder="需要符合规范"
+            />
+          </n-form-item-gi>
+        </n-grid>
+        <n-form-item label="模组描述">
+          <n-input
+            v-model:value="createProjectInfo.PropertyGroup.Description"
+            placeholder="尽量简短"
+            type="textarea"
+          />
+        </n-form-item>
+        <n-grid :cols="24" :x-gap="20">
+          <n-form-item-gi label="最低支持版本" span="12">
+            <n-spin
+              style="width: 100%"
+              :size="'small'"
+              :show="refreshVersionSpinShow"
             >
-          </n-form-item>
-        </n-form>
-      </n-card>
+              <div id="latest-version">
+                <span>{{
+                  createProjectInfo.PropertyGroup.LastWorkingBuild
+                }}</span>
+                <n-button
+                  type="primary"
+                  @click="refreshVersion"
+                  :loading="buttonLoading"
+                  >刷新</n-button
+                >
+              </div>
+            </n-spin>
+          </n-form-item-gi>
+          <n-form-item-gi label="平台" span="12">
+            <span>{{ createProjectInfo.PropertyGroup.Platforms }}</span>
+          </n-form-item-gi>
+        </n-grid>
+        <n-form-item class="flex flex-end">
+          <n-button
+            type="primary"
+            style="margin-right: 6px"
+            @click="createProject"
+            :loading="buttonLoading"
+            >确认</n-button
+          >
+        </n-form-item>
+      </n-form>
+    </n-card>
+    <div v-show="showGitButton" class="git-icon-button">
+      <img src="/Git-Icon-White.svg" alt="git logo"/>
+    </div>
+
   </div>
 </template>
 
 <style scoped>
-#latest-version{
+
+.git-icon-button{
+  height: 32px;
+  width: 32px;
+  border-radius: 999px;
+  background: #f14e32;
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.git-icon-button img{
+  height: 24px;
+  width: 24px;
+  box-sizing: border-box;
+  display: block;
+}
+
+#latest-version {
   width: 100%;
   display: flex;
   justify-content: space-between;

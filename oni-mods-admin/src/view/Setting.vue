@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { NForm, NFormItem, NButton, NInput, useMessage } from 'naive-ui';
 import { ref } from 'vue';
-import { type ConfigInfo, getConfigInfo, StatusCode, updateConfigInfo } from '../uitls/invokes';
+import {
+  type ConfigInfo,
+  getConfigInfo,
+  StatusCode,
+  updateConfigInfo,
+} from '../uitls/invokes';
 import router from '../router';
 const configInfo = ref<ConfigInfo>({
   latest_version: 'test',
@@ -13,8 +18,8 @@ async function getLocalConfig() {
   const result = await getConfigInfo();
   if (result.code == StatusCode.SUCCESS) {
     configInfo.value = JSON.parse(result.message);
-    console.log(result.message)
-    console.log(configInfo.value)
+    console.log(result.message);
+    console.log(configInfo.value);
   } else {
     message.error('读取本地配置出错' + result.message);
   }
@@ -22,11 +27,11 @@ async function getLocalConfig() {
 async function back() {
   const result = await updateConfigInfo(configInfo.value);
   if (result.code == StatusCode.SUCCESS) {
-    message.success(result.message)
-  }else {
-    message.error(result.message)
+    message.success(result.message);
+  } else {
+    message.error(result.message);
   }
-  await router.push("/");
+  await router.push('/');
 }
 getLocalConfig();
 </script>
@@ -49,8 +54,7 @@ getLocalConfig();
 </template>
 
 <style scoped>
-.main{
+.main {
   padding: 10px;
 }
-
 </style>

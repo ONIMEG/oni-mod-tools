@@ -1,12 +1,12 @@
 use std::path::{PathBuf};
 use anyhow::{Error as AnyError};
-use git2::{Remote, Repository, StatusOptions};
+use git2::{Repository, StatusOptions};
 use Result::Ok;
 use serde::{Deserialize, Serialize};
-use tauri::api::dialog::message;
 
 
 pub const GIT_REPO_NOT_EXIST:u16 = 100;
+pub const FAIL_GET_STATUES:u16 = 101;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StatuesItem {
     status_type: u8,

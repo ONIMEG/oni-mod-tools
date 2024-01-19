@@ -1,7 +1,8 @@
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use crate::functions::{info, project};
+use crate::functions::git::{FAIL_GET_STATUES, get_statuses};
 
 
 const SUCCESS:u16 = 200;
@@ -110,6 +111,15 @@ pub fn update_config_info(new_config_info: String) -> String{
     return ResultBody::convert(READ_CONFIG_INFO_ERROE,  result.err().unwrap().to_string().as_str());
   }
   return ResultBody::convert(SUCCESS, "保存配置成功");
+}
+
+pub fn git_statues(path: String) -> String {
+  let repo_path = PathBuf::new().join(path);
+  let result = get_statuses(repo_path);
+  if !result.is_ok(){
+    return ResultBody::convert(FAIL_GET_STATUES, result.err().unwrap().to_string().as_str())
+  }
+  return ResultBody::convert(SUCCESS, serde_json::to_string(&result.unwrap()).unwrap().as_str())
 }
 
 #[cfg(test)]

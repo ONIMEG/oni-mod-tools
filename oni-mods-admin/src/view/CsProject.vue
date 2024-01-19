@@ -19,7 +19,7 @@ import {
 } from '../uitls/invokes';
 
 const projectStore = useProjectStore();
-const projectItem =  ref<CsprojItem>(projectStore.currentCsProjInfo);
+const projectItem = ref<CsprojItem>(projectStore.currentCsProjInfo);
 const projectInfo = projectItem.value.prop;
 const buttonLoading = ref<boolean>(false);
 const refreshVersionSpinShow = ref<boolean>(false);
