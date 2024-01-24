@@ -95,9 +95,3 @@ export async function updateConfigInfo(
   const result: string = await invoke<string>('update_config_info', { info });
   return JSON.parse(result);
 }
-
-export async function gitStatues(repo_path: string): Promise<ResultBody> {
-  const info: string = repo_path;
-  const result: string = await invoke<string>('git_statues', { info });
-  return JSON.parse(result);
-}

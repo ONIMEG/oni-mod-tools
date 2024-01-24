@@ -86,20 +86,6 @@ getSolutionList();
           </n-button>
           <div class="c-item-hint">新建</div>
         </div>
-        <!--        <div>-->
-        <!--          <n-button-->
-        <!--            strong-->
-        <!--            secondary-->
-        <!--            type="primary"-->
-        <!--            class="c-item"-->
-        <!--            @click="open"-->
-        <!--          >-->
-        <!--            <n-icon>-->
-        <!--              <OpenMod />-->
-        <!--            </n-icon>-->
-        <!--          </n-button>-->
-        <!--          <div class="c-item-hint">打开</div>-->
-        <!--        </div>-->
       </div>
     </div>
     <div id="recent" class="flex-1">

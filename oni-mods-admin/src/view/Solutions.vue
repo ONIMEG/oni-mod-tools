@@ -8,7 +8,7 @@ import {
   Project,
   CsprojItem,
   ResultBody,
-  StatusCode, gitStatues,
+  StatusCode,
 } from '../uitls/invokes';
 import { ref } from 'vue';
 import {
@@ -25,7 +25,6 @@ import {
 } from 'naive-ui';
 import router from '../router';
 
-const showGitButton = ref<boolean>(true);
 const projectStore = useProjectStore();
 const solutionItem = projectStore.solutionItem;
 const csproj = ref<CsprojItem[]>([]);
@@ -129,19 +128,8 @@ async function getConfigVersion() {
   refreshVersionSpinShow.value = false;
 }
 
-async function getGitStatues(){
-  let result = await gitStatues(`${projectStore.solutionItem.path}\\${projectStore.solutionItem.name}`);
-  if (result.code !== StatusCode.SUCCESS) {
-    message.error(result.message);
-  } else {
-    let msg = JSON.parse(result.message);
-    console.log(msg)
-  }
-}
-
 getConfigVersion();
 getCsprojListN();
-getGitStatues();
 </script>
 
 <template>
@@ -229,35 +217,10 @@ getGitStatues();
         </n-form-item>
       </n-form>
     </n-card>
-    <div v-show="showGitButton" class="git-icon-button">
-      <img src="/Git-Icon-White.svg" alt="git logo"/>
-    </div>
-
   </div>
 </template>
 
 <style scoped>
-
-.git-icon-button{
-  height: 32px;
-  width: 32px;
-  border-radius: 999px;
-  background: #f14e32;
-  position: absolute;
-  left: 20px;
-  bottom: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.git-icon-button img{
-  height: 24px;
-  width: 24px;
-  box-sizing: border-box;
-  display: block;
-}
-
 #latest-version {
   width: 100%;
   display: flex;

@@ -4,15 +4,6 @@ import { NLayout, NLayoutContent, NMessageProvider } from 'naive-ui';
 
 <template>
   <n-layout class="full-height">
-    <!--    <n-layout-header class="nav"></n-layout-header>-->
-    <!--    <n-layout has-sider class="main">-->
-    <!--      <n-layout-sider class="menu">-->
-    <!--        <VerticalMenu/>-->
-    <!--      </n-layout-sider>-->
-    <!--      <n-layout-content class="view">-->
-    <!--        <router-view></router-view>-->
-    <!--      </n-layout-content>-->
-    <!--    </n-layout>-->
     <n-layout class="full-height">
       <n-layout-content class="full-height view">
         <n-message-provider>
