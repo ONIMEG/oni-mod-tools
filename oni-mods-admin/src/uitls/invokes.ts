@@ -59,12 +59,6 @@ export async function getSavedSolutionsList(): Promise<ResultBody> {
   return JSON.parse(result);
 }
 
-export async function getCsprojList(infoJ: SolutionItem): Promise<ResultBody> {
-  const info: string = JSON.stringify(infoJ);
-  const result: string = await invoke<string>('get_csproj_list', { info });
-  return JSON.parse(result);
-}
-
 export async function addNewProject(
   solutionInfoJ: CreateProjectInfo,
   projectInfoJ: Project,

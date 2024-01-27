@@ -14,11 +14,6 @@ fn get_solution_list() -> String{
 }
 
 #[tauri::command]
-fn get_csproj_list(info: String) -> String{
-  io::get_project_list(info)
-}
-
-#[tauri::command]
 fn add_new_project(sln: String, csproj: String) -> String{
   io::add_new_project(sln, csproj)
 }
@@ -40,7 +35,6 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             create_project,
             get_solution_list,
-            get_csproj_list,
             add_new_project,
             refresh_version,
             get_config_info,

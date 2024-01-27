@@ -2,11 +2,9 @@
 import { useProjectStore } from '../store/project.store';
 import {
   addNewProject,
-  getCsprojList,
   getLatestVersion,
   getConfigInfo,
   Project,
-  CsprojItem,
   ResultBody,
   StatusCode,
 } from '../uitls/invokes';
@@ -26,8 +24,6 @@ import {
 import router from '../router';
 
 const projectStore = useProjectStore();
-const solutionItem = projectStore.solutionItem;
-const csproj = ref<CsprojItem[]>([]);
 const buttonLoading = ref<boolean>(false);
 const message = useMessage();
 const spinShow = ref<boolean>(false);
@@ -46,25 +42,6 @@ const createProjectInfo = ref<Project>({
 });
 
 const menuOption = ref<MenuOption[]>();
-
-async function getCsprojListN() {
-  spinShow.value = true;
-  let result = await getCsprojList(solutionItem);
-  if (result.code !== StatusCode.SUCCESS) {
-    message.error('读取项目失败' + result.message);
-  }
-  csproj.value = await JSON.parse(result.message);
-  let menuOptionsBuffer = [];
-  for (let i = 0; i < csproj.value.length; i++) {
-    let newMenuOption: MenuOption = {
-      key: i,
-      label: csproj.value[i].name,
-    };
-    menuOptionsBuffer.push(newMenuOption);
-  }
-  menuOption.value = menuOptionsBuffer;
-  spinShow.value = false;
-}
 
 async function back() {
   router.back();
@@ -129,7 +106,6 @@ async function getConfigVersion() {
 }
 
 getConfigVersion();
-getCsprojListN();
 </script>
 
 <template>

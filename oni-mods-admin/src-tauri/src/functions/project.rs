@@ -161,25 +161,6 @@ pub fn create_csproj(target_path: PathBuf, new_info:&Project)->Result<(), AnyErr
   Ok(())
 }
 
-// 添加管理文件
-fn add_admin_item(target_path: PathBuf, new_info: &Project) -> Result<(), AnyError>{
-  let parent = target_path.parent().unwrap().parent().expect("没找到根目录");
-  let admin = parent.join(".admin");
-  let mut csproj_s:Vec<ProjectItem> = vec![];
-  if !admin.exists() {
-    csproj_s.push(ProjectItem::new(target_path,new_info.property_group.assembly_title.clone(),new_info.clone()));
-    let content = serde_json::to_string(&csproj_s)?;
-    fs::write(admin,content)?;
-    return Ok(());
-  }
-  let mut content = read_to_string(&admin)?;
-  csproj_s = serde_json::from_str(&content.as_str())?;
-  csproj_s.push(ProjectItem::new(target_path,new_info.property_group.assembly_title.clone(),new_info.clone()));
-  content = serde_json::to_string(&csproj_s)?;
-  fs::write(admin,content)?;
-  Ok(())
-}
-
 // 添加 Mod.cs
 fn add_mod_cs(target_path: PathBuf, new_info: &Project) -> Result<(), AnyError>{
   let mut file_obj = File::open("./resources/Mod.cs").expect("找不到 Mod.cs");
@@ -197,10 +178,6 @@ pub fn add_new_project(create_project_info: &CreateProjectInfo, project:Project)
   println!("{:#?}\n{:#?}\n{:#?}",&solution_path,&csproj_path,&target_sln);
   fs::create_dir(&csproj_path)?;
   create_csproj(
-    csproj_path.join(format!("{}.csproj",create_project_info.project_name)),
-    &project
-  )?;
-  add_admin_item(
     csproj_path.join(format!("{}.csproj",create_project_info.project_name)),
     &project
   )?;

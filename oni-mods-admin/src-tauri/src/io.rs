@@ -4,14 +4,12 @@ use serde::{Deserialize, Serialize};
 use crate::functions::{info, project};
 use crate::functions::git::{FAIL_GET_STATUES, get_statuses};
 
-
 const SUCCESS:u16 = 200;
 const CONVERT_ERROR:u16 = 500;
 const CREATE_PROJECT_ERROR:u16 = 501;
 const GET_SOLUTION_LIST_ERROR:u16 = 502;
-const GET_PROJECT_LIST_ERROR:u16 = 503;
 const GET_NEW_VERSION_ERROR:u16 = 504;
-const READ_CONFIG_INFO_ERROE:u16 = 505;
+const READ_CONFIG_INFO_ERROR:u16 = 505;
 
 #[derive(Debug,Serialize,Deserialize)]
 pub struct ResultBody{
@@ -60,18 +58,6 @@ pub fn get_solution_list() -> String{
   return ResultBody::convert(SUCCESS,"[]");
 }
 
-pub fn get_project_list(json_solution_item:String) -> String{
-  let solution_item = serde_json::from_str(&json_solution_item);
-  if !solution_item.is_ok() {
-    return ResultBody::convert(CONVERT_ERROR, solution_item.err().unwrap().to_string().as_str())
-  }
-  let result = project::get_csproj_list_var_buffer(solution_item.unwrap());
-  if  !result.is_ok() {
-    return ResultBody::convert(GET_PROJECT_LIST_ERROR, result.err().unwrap().to_string().as_str())
-  }
-  return ResultBody::convert(SUCCESS, result.unwrap().as_str());
-}
-
 pub fn add_new_project(json_solution_info:String, json_new_project_info:String) -> String{
   let solution_info:Result<project::CreateProjectInfo, _>= serde_json::from_str(&json_solution_info);
   let new_project_info:Result<project::Project, _> = serde_json::from_str(&json_new_project_info);
@@ -96,7 +82,7 @@ pub fn refresh_version() -> String{
 pub fn get_config_info() -> String{
   let result = info::load_config_file();
   if !result.is_ok() {
-    return ResultBody::convert(READ_CONFIG_INFO_ERROE,  result.err().unwrap().to_string().as_str());
+    return ResultBody::convert(READ_CONFIG_INFO_ERROR, result.err().unwrap().to_string().as_str());
   }
   return ResultBody::convert(SUCCESS, serde_json::to_string(&result.unwrap()).unwrap().as_str());
 }
@@ -108,7 +94,7 @@ pub fn update_config_info(new_config_info: String) -> String{
   }
   let result = info::save_config_file(&config_info.unwrap());
   if result.is_err() {
-    return ResultBody::convert(READ_CONFIG_INFO_ERROE,  result.err().unwrap().to_string().as_str());
+    return ResultBody::convert(READ_CONFIG_INFO_ERROR, result.err().unwrap().to_string().as_str());
   }
   return ResultBody::convert(SUCCESS, "保存配置成功");
 }
