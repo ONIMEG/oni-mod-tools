@@ -13,9 +13,10 @@ pub struct StatuesItem {
     old_path: String,
     new_path: String
 }
-pub fn is_repo_exist(path: PathBuf) -> Result<String, AnyError> {
-    let _repo = Repository::open(path)?;
-    Ok(String::from("仓库存在"))
+
+pub fn create_new_repo(repo_path: PathBuf) -> Result<(), AnyError>{
+    Repository::init(repo_path)?;
+    Ok(())
 }
 
 pub fn get_statuses(path: PathBuf) -> Result<Vec<StatuesItem>, AnyError>{
@@ -84,23 +85,8 @@ pub fn commit_change(repo_path: PathBuf, msg: &str) -> Result<(),AnyError>{
     Ok(())
 }
 
-pub fn add_remote(repo_path:PathBuf, name:&str, url:&str) -> Result<(), AnyError>{
-    let repo = Repository::open(repo_path)?;
-    let _remote = repo.remote(name, url)?;
-    Ok(())
-}
-
 mod test{
     use super::*;
-    #[test]
-    fn test_repo(){
-        let result = is_repo_exist(PathBuf::new().join("C:\\Users\\26216\\code\\CSharp\\ONI-Mods"));
-        print!("{:?}", result);
-        assert_eq!(result.is_ok(), true);
-        let result = is_repo_exist(PathBuf::new().join("C:\\Users\\26216\\code\\CSharp"));
-        print!("{:?}", result);
-        assert_eq!(result.is_err(), true);
-    }
     #[test]
     fn test_statues(){
         let result = get_statuses(PathBuf::new().join("C:\\Users\\26216\\code\\CSharp\\ONI-Mods"));
@@ -117,6 +103,13 @@ mod test{
     #[test]
     fn test_commit(){
         let result = commit_change(PathBuf::new().join("C:\\Users\\26216\\code\\Others\\test_for_rs_git"),"test commit");
+        print!("{:?}", result);
+        assert_eq!(result.is_ok(), true);
+    }
+
+    #[test]
+    fn test_create_new_repo(){
+        let result = create_new_repo(PathBuf::new().join("C:\\Users\\26216\\code\\Others\\new_repo"));
         print!("{:?}", result);
         assert_eq!(result.is_ok(), true);
     }

@@ -28,7 +28,9 @@ fn get_config_info() -> String{io::get_config_info()}
 fn update_config_info(info: String) -> String{io::update_config_info(info)}
 
 #[tauri::command]
-fn git_statues(info: String) -> String{io::git_statues(info)}
+fn git_create_new_repo(info: String) -> String{
+    io::io_create_new_repo(info)
+}
 
 fn main() {
     tauri::Builder::default()
@@ -39,7 +41,7 @@ fn main() {
             refresh_version,
             get_config_info,
             update_config_info,
-            git_statues,
+            git_create_new_repo,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

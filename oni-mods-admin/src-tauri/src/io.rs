@@ -2,7 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use crate::functions::{info, project};
-use crate::functions::git::{FAIL_GET_STATUES, get_statuses};
+use crate::functions::git::{create_new_repo, FAIL_GET_STATUES, get_statuses, GIT_REPO_NOT_EXIST};
 
 const SUCCESS:u16 = 200;
 const CONVERT_ERROR:u16 = 500;
@@ -99,13 +99,14 @@ pub fn update_config_info(new_config_info: String) -> String{
   return ResultBody::convert(SUCCESS, "保存配置成功");
 }
 
-pub fn git_statues(path: String) -> String {
-  let repo_path = PathBuf::new().join(path);
-  let result = get_statuses(repo_path);
-  if !result.is_ok(){
-    return ResultBody::convert(FAIL_GET_STATUES, result.err().unwrap().to_string().as_str())
+pub fn io_create_new_repo(repo_path_string: String) -> String{
+  let repo_path = PathBuf::new().join(repo_path_string);
+  let result = create_new_repo(repo_path);
+  return if result.is_ok() {
+    ResultBody::convert(SUCCESS, "创建仓库成功")
+  } else {
+    ResultBody::convert(GIT_REPO_NOT_EXIST, "创建仓库失败")
   }
-  return ResultBody::convert(SUCCESS, serde_json::to_string(&result.unwrap()).unwrap().as_str())
 }
 
 #[cfg(test)]

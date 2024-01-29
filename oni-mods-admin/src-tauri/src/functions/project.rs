@@ -242,11 +242,6 @@ fn format_xml(xml_string: String) -> Result<String, AnyError> {
   Ok(formatted_xml)
 }
 
-pub fn get_csproj_list_var_buffer(solution_item: SavedSolutionItem) -> Result<String, AnyError> {
-  let admin = solution_item.path.join(solution_item.name).join(".admin");
-  return Ok(read_to_string(admin)?);
-}
-
 pub fn update_csproj_info(new_csproj_info:ProjectItem)->Result<(),AnyError>{
   let csproj:Project = serde_xml_rs::from_str(&*read_to_string(new_csproj_info.path)?)?;
   print!("{:?}",csproj);
