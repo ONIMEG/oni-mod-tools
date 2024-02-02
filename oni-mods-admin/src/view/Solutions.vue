@@ -10,7 +10,6 @@ import {
 } from '../uitls/invokes';
 import { ref } from 'vue';
 import {
-  MenuOption,
   NButton,
   NCard,
   NForm,
@@ -41,8 +40,6 @@ const createProjectInfo = ref<Project>({
   },
 });
 
-const menuOption = ref<MenuOption[]>();
-
 async function back() {
   router.back();
 }
@@ -62,7 +59,7 @@ async function createProject() {
     return;
   }
   projectStore.createProjectInfo.project_name =
-    createProjectInfo.value.PropertyGroup.RootNamespace;
+    createProjectInfo.value.PropertyGroup.AssemblyTitle;
   let result = await addNewProject(
     projectStore.createProjectInfo,
     createProjectInfo.value,
@@ -178,7 +175,7 @@ getConfigVersion();
               </div>
             </n-spin>
           </n-form-item-gi>
-          <n-form-item-gi label="平台" span="12">
+          <n-form-item-gi label="平台 默认即可" span="12">
             <span>{{ createProjectInfo.PropertyGroup.Platforms }}</span>
           </n-form-item-gi>
         </n-grid>

@@ -75,15 +75,7 @@ impl Project {
   }
 }
 
-impl ProjectItem {
-  pub fn new(path: PathBuf, name: String, prop: Project) -> ProjectItem {
-    ProjectItem{
-      path,
-      name,
-      prop
-    }
-  }
-}
+
 
 impl SavedSolutionItem {
   pub fn new(path: PathBuf, name: String) -> SavedSolutionItem {

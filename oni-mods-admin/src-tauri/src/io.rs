@@ -2,7 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use crate::functions::{info, project};
-use crate::functions::git::{create_new_repo, FAIL_GET_STATUES, get_statuses, GIT_REPO_NOT_EXIST};
+use crate::functions::git::{add_to_commit, commit_change, create_new_repo, GIT_REPO_NOT_EXIST};
 
 const SUCCESS:u16 = 200;
 const CONVERT_ERROR:u16 = 500;
@@ -101,8 +101,10 @@ pub fn update_config_info(new_config_info: String) -> String{
 
 pub fn io_create_new_repo(repo_path_string: String) -> String{
   let repo_path = PathBuf::new().join(repo_path_string);
-  let result = create_new_repo(repo_path);
-  return if result.is_ok() {
+  let result = create_new_repo(repo_path.clone());
+  let add_result = add_to_commit(repo_path.clone());
+  let commit_result = commit_change(repo_path.clone(), "缺氧模组创建器初次提交");
+  return if result.is_ok() && add_result.is_ok() && commit_result.is_ok() {
     ResultBody::convert(SUCCESS, "创建仓库成功")
   } else {
     ResultBody::convert(GIT_REPO_NOT_EXIST, "创建仓库失败")
@@ -141,5 +143,11 @@ mod tests {
   fn test_get_config_info(){
     let result = get_config_info();
     print!("{:?}",result);
+  }
+
+  #[test]
+  fn test_create_git_repo(){
+    let result = io_create_new_repo(String::from("C:\\Users\\26216\\code\\Others\\new_repo"));
+    print!("{:?}", result);
   }
 }

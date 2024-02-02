@@ -5,6 +5,7 @@ import {
   NInput,
   NButton,
   NIcon,
+  NRadio,
   NSpin,
   FormInst,
   useMessage,
@@ -15,6 +16,7 @@ import {
   createProject,
   ResultBody,
   StatusCode,
+  initGitRepo,
 } from '../uitls/invokes';
 import { useProjectStore } from '../store/project.store';
 import { ArrowLeftOutlined as Back } from '@vicons/antd';
@@ -31,6 +33,7 @@ const formInfo = ref<CreateProjectInfo>({
 const projectStore = useProjectStore();
 const loadingVisible = ref<boolean>(false);
 const message = useMessage();
+const createGitRepo = ref<boolean>(false);
 const reg: RegExp = /^[a-zA-Z0-9_-]+$/;
 formInfo.value.root = projectStore.createProjectInfo.root;
 function createStatus(value: string) {
@@ -39,6 +42,7 @@ function createStatus(value: string) {
   }
   return 'success';
 }
+
 function createFeedback(value: string) {
   if (!value) {
     return '需要填写';
@@ -62,6 +66,13 @@ async function create(e: MouseEvent) {
   loadingVisible.value = false;
   if (result.code === StatusCode.SUCCESS) {
     message.success('成功');
+    if (createGitRepo.value) {
+      console.log(formInfo.value);
+      await gitRepoInit(
+        formInfo.value.root + '//' + formInfo.value.solution_name,
+      );
+      router.back();
+    }
     return;
   }
   if (result.code === StatusCode.CONVERT_ERROR) {
@@ -70,6 +81,16 @@ async function create(e: MouseEvent) {
     message.error(`项目创建失败：${result.message}`);
   }
   console.log(result.message);
+}
+
+async function gitRepoInit(repoPath: string) {
+  console.log(repoPath);
+  const result = await initGitRepo(repoPath);
+  if (result.code == StatusCode.SUCCESS) {
+    message.success('初始化 Git 仓库成功');
+  } else {
+    message.warning('项目创建成功但初始化 Git 仓库失败');
+  }
 }
 </script>
 
@@ -134,6 +155,11 @@ async function create(e: MouseEvent) {
           v-model:value="formInfo.solution_name"
           placeholder="解决方案"
         />
+      </n-form-item>
+      <n-form-item>
+        <n-radio :default-checked="false" v-model:checked="createGitRepo">
+          是否初始化 Git 仓库
+        </n-radio>
       </n-form-item>
       <n-form-item class="flex flex-end center-offset">
         <n-button type="primary" @click="create">确认</n-button>

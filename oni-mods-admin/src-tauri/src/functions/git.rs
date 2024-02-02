@@ -6,7 +6,6 @@ use serde::{Deserialize, Serialize};
 
 
 pub const GIT_REPO_NOT_EXIST:u16 = 100;
-pub const FAIL_GET_STATUES:u16 = 101;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StatuesItem {
     status_type: u8,
