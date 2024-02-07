@@ -135,7 +135,9 @@ pub fn create_project(info: CreateProjectInfo) -> Result<(), AnyError> {
   content = content.replace("$[guid]", &*guid());
   fs::write(&(&target_sln), content)?;
   // 创建 csproj 项目
-  add_new_project(&info,Project::new(info.project_name.clone()))?;
+  if (info.project_name != ""){
+    add_new_project(&info,Project::new(info.project_name.clone()))?;
+  }
   Ok(())
 }
 

@@ -4,9 +4,7 @@ import {
   NFormItem,
   NInput,
   NButton,
-  NIcon,
   NRadio,
-  NSpin,
   FormInst,
   useMessage,
 } from 'naive-ui';
@@ -91,78 +89,43 @@ async function gitRepoInit(repoPath: string) {
 </script>
 
 <template>
-  <n-spin class="form flex flex-all-center" :show="loadingVisible">
-    <n-button
-      id="back"
-      @click="
-        () => {
-          router.back();
-        }
+  <n-form
+    label-placement="left"
+    label-width="auto"
+    ref="formRef"
+    style="width: 60vw"
+  >
+    <n-form-item label="解决方案位置">
+      <n-input
+        v-model:value="formInfo.root"
+        disabled
+        placeholder="如果你能看到我，说明出错了"
+      />
+    </n-form-item>
+    <n-form-item
+      label="解决方案名称"
+      :validation-status="
+        computed(() => {
+          return createStatus(formInfo.solution_name);
+        }).value
       "
-      secondary
+      :feedback="
+        computed(() => {
+          return createFeedback(formInfo.solution_name);
+        }).value
+      "
     >
-      <n-icon>
-        <Back />
-      </n-icon>
-    </n-button>
-    <h2 class="title">创建解决方案</h2>
-    <n-form
-      label-placement="left"
-      label-width="auto"
-      ref="formRef"
-      style="width: 60vw"
-    >
-      <n-form-item label="解决方案位置">
-        <n-input
-          v-model:value="formInfo.root"
-          disabled
-          placeholder="如果你能看到我，说明出错了"
-        />
-      </n-form-item>
-      <n-form-item
-        label="解决方案名称"
-        :validation-status="
-          computed(() => {
-            return createStatus(formInfo.solution_name);
-          }).value
-        "
-        :feedback="
-          computed(() => {
-            return createFeedback(formInfo.solution_name);
-          }).value
-        "
-      >
-        <n-input
-          v-model:value="formInfo.solution_name"
-          placeholder="解决方案"
-        />
-      </n-form-item>
-      <n-form-item>
-        <n-radio :default-checked="false" v-model:checked="createGitRepo">
-          是否初始化 Git 仓库
-        </n-radio>
-      </n-form-item>
-      <n-form-item class="flex flex-end center-offset">
-        <n-button type="primary" @click="create">确认</n-button>
-      </n-form-item>
-    </n-form>
-  </n-spin>
+      <n-input v-model:value="formInfo.solution_name" placeholder="解决方案" />
+    </n-form-item>
+    <n-form-item>
+      <n-radio :default-checked="false" v-model:checked="createGitRepo">
+        是否初始化 Git 仓库
+      </n-radio>
+    </n-form-item>
+    <n-form-item class="flex flex-end center-offset">
+      <n-button type="primary" @click="create">确认</n-button>
+    </n-form-item>
+  </n-form>
 </template>
 
-<style scoped>
-.form {
-  padding: 1rem 2rem;
-  height: 100vh;
-  box-sizing: border-box;
-}
-
-.title {
-  margin-bottom: 2rem;
-}
-
-#back {
-  position: fixed;
-  top: 1rem;
-  left: 1rem;
-}
-</style>
+<style scoped></style>

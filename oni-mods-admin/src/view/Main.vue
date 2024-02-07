@@ -63,7 +63,7 @@ async function open() {
     return;
   }
 }
-
+router.push('/dashboard');
 getSolutionList();
 </script>
 
