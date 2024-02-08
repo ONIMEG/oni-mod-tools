@@ -20,6 +20,9 @@
 - [ ] 修改编译变量
 - [ ] 代码模板
 
+### 贡献指南
+[CONTRIBUTING](./CONTRIBUTING)
+
 ## 鸣谢
 
 感谢 [JetBrains](https://jb.gg/OpenSourceSupport) 为本开源项目提供的免费 IDE 支持
