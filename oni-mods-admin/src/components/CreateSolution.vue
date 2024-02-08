@@ -5,6 +5,7 @@ import {
   NInput,
   NButton,
   NRadio,
+  NInputGroup,
   FormInst,
   useMessage,
 } from 'naive-ui';
@@ -16,24 +17,22 @@ import {
   StatusCode,
   initGitRepo,
 } from '../uitls/invokes';
-import { useProjectStore } from '../store/project.store';
-import { ArrowLeftOutlined as Back } from '@vicons/antd';
 import { useRouter } from 'vue-router';
+import { dialog } from '@tauri-apps/api';
 
 const router = useRouter();
-
 const formRef = ref<FormInst | null>(null);
 const formInfo = ref<CreateProjectInfo>({
   root: '',
   project_name: '',
   solution_name: 'ONI-Mods',
 });
-const projectStore = useProjectStore();
 const loadingVisible = ref<boolean>(false);
 const message = useMessage();
 const createGitRepo = ref<boolean>(false);
 const reg: RegExp = /^[a-zA-Z0-9_-]+$/;
-formInfo.value.root = projectStore.createProjectInfo.root;
+const emit = defineEmits(['create']);
+
 function createStatus(value: string) {
   if (!value || !reg.test(value)) {
     return 'error';
@@ -61,6 +60,7 @@ async function create(e: MouseEvent) {
   loadingVisible.value = false;
   if (result.code === StatusCode.SUCCESS) {
     message.success('成功');
+    emit('create', true);
     if (createGitRepo.value) {
       console.log(formInfo.value);
       await gitRepoInit(
@@ -86,6 +86,20 @@ async function gitRepoInit(repoPath: string) {
     message.warning('项目创建成功但初始化 Git 仓库失败');
   }
 }
+
+async function selectPath() {
+  const path = await dialog.open({
+    title: '选择创建位置',
+    multiple: false,
+    directory: true,
+  });
+  if (path === null) return;
+  if (Array.isArray(path)) {
+    message.warning('请选择单个目录');
+    return;
+  }
+  formInfo.value.root = path;
+}
 </script>
 
 <template>
@@ -95,15 +109,17 @@ async function gitRepoInit(repoPath: string) {
     ref="formRef"
     style="width: 60vw"
   >
-    <n-form-item label="解决方案位置">
-      <n-input
-        v-model:value="formInfo.root"
-        disabled
-        placeholder="如果你能看到我，说明出错了"
-      />
+    <n-form-item label="路径">
+      <n-input-group>
+        <n-input
+          v-model:value="formInfo.root"
+          placeholder="新建模组项目集位置"
+        />
+        <n-button tertiary @click="selectPath"> 选择 </n-button>
+      </n-input-group>
     </n-form-item>
     <n-form-item
-      label="解决方案名称"
+      label="名称"
       :validation-status="
         computed(() => {
           return createStatus(formInfo.solution_name);
@@ -122,10 +138,27 @@ async function gitRepoInit(repoPath: string) {
         是否初始化 Git 仓库
       </n-radio>
     </n-form-item>
-    <n-form-item class="flex flex-end center-offset">
-      <n-button type="primary" @click="create">确认</n-button>
+    <n-form-item>
+      <div id="confirm-info">
+        <span id="hint">
+          解决方案将保存在路径的 {{ formInfo.solution_name }} 文件夹下
+        </span>
+        <n-button type="primary" @click="create">确认</n-button>
+      </div>
     </n-form-item>
   </n-form>
 </template>
 
-<style scoped></style>
+<style scoped>
+#hint {
+  font-size: xx-small;
+  color: #737373;
+}
+
+#confirm-info {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: flex-end;
+}
+</style>

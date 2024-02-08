@@ -6,6 +6,10 @@
   height: 100%;
 }
 
+.full-width {
+  width: 100%;
+}
+
 .flex-1 {
   flex: 1;
 }
@@ -16,6 +20,10 @@
 
 .flex-end {
   justify-content: end;
+}
+
+.flex-between {
+  justify-content: space-between;
 }
 
 .flex-all-center {

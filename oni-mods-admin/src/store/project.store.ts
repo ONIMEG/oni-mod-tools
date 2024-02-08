@@ -7,6 +7,7 @@ export const useProjectStore = defineStore({
     createProjectInfo: CreateProjectInfo;
     solutionItem: SolutionItem;
     currentCsProjInfo: CsprojItem;
+    pathBuffer: string;
   } => ({
     createProjectInfo: {
       root: 'usr/join',
@@ -32,5 +33,6 @@ export const useProjectStore = defineStore({
         },
       },
     },
+    pathBuffer: '',
   }),
 });

@@ -7,6 +7,7 @@ import {
   NList,
   NListItem,
   NButton,
+  NCard,
   useMessage,
 } from 'naive-ui';
 import { ref } from 'vue';
@@ -16,14 +17,16 @@ import {
   ResultBody,
   SolutionItem,
 } from '../uitls/invokes';
-import { CaretDownFilled as DownArrow } from '@vicons/antd';
+import { CaretDownFilled as DownArrow, CloseOutlined } from '@vicons/antd';
 import { useProjectStore } from '../store/project.store';
+import CreateSolution from '../components/CreateSolution.vue';
 
 const message = useMessage();
 const projectInfo = useProjectStore();
 const solutionList = ref<SolutionItem[]>([]);
 const title = ref<string>('solution-title');
-const selectSolutionModalShow = ref<boolean>(true);
+const selectSolutionModalShow = ref<boolean>(false);
+const createNewSolutionModalShow = ref<boolean>(false);
 const options = ref([
   {
     label: '切换解决方案',
@@ -34,10 +37,13 @@ const options = ref([
     key: 'new',
   },
 ]);
+
 const select = function (key: string) {
   if (key == 'open') {
     if (solutionList.value.length == 0) getSolutionList();
     selectSolutionModalShow.value = true;
+  } else {
+    createNewSolutionModalShow.value = true;
   }
 };
 const selectOneSolution = function (solution: SolutionItem) {
@@ -72,6 +78,29 @@ async function getSolutionList() {
         </n-list>
       </div>
     </n-modal>
+    <n-modal v-model:show="createNewSolutionModalShow">
+      <n-card title="新建解决方案" size="medium">
+        <template #header-extra>
+          <n-button
+            quaternary
+            text
+            type="error"
+            @click="createNewSolutionModalShow = false"
+          >
+            <template #icon>
+              <CloseOutlined />
+            </template>
+          </n-button>
+        </template>
+        <CreateSolution
+          @create="
+            () => {
+              createNewSolutionModalShow = false;
+            }
+          "
+        />
+      </n-card>
+    </n-modal>
     <div id="header">
       <n-dropdown
         trigger="hover"
@@ -94,8 +123,8 @@ async function getSolutionList() {
       <n-tab-pane name="oasis" tab="新建模组" id="create-cs-project">
         <CreateCsProject />
       </n-tab-pane>
-      <n-tab-pane name="the beatles" tab="编译变量"> Hey Jude </n-tab-pane>
-      <n-tab-pane name="the " tab="仓库"> Hey Judett </n-tab-pane>
+<!--      <n-tab-pane name="the beatles" tab="编译变量"> Hey Jude </n-tab-pane>-->
+      <n-tab-pane name="the " tab="仓库"></n-tab-pane>
     </n-tabs>
   </div>
 </template>
@@ -116,12 +145,12 @@ async function getSolutionList() {
   align-items: center;
 }
 
-#solution-drop-down span{
+#solution-drop-down span {
   margin-right: 2px;
 }
 
 #create-cs-project {
-  padding: 16px 12px 0;
+  padding: 41px 34px 0;
   box-sizing: border-box;
 }
 
@@ -133,5 +162,11 @@ async function getSolutionList() {
 
 #solution-list {
   width: 60vw;
+}
+
+.n-card {
+  max-width: 65vw;
+  box-sizing: border-box;
+  height: auto;
 }
 </style>

@@ -173,4 +173,10 @@ getConfigVersion();
   </n-form>
 </template>
 
-<style scoped></style>
+<style scoped>
+#latest-version {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+</style>
