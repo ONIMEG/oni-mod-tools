@@ -27,7 +27,7 @@ const pageInfo = computed(() => {
   </Layout>
 </template>
 
-<style>
+<style scoped>
 .contributer{
   line-height: 24px;
     font-size: 14px;
