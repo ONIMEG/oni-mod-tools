@@ -99,6 +99,15 @@ pub fn update_config_info(new_config_info: String) -> String{
   return ResultBody::convert(SUCCESS, "保存配置成功");
 }
 
+pub fn io_store_current_project(current_project_info: String) -> String{
+  let result = info::info_store_current_project(current_project_info);
+  return if result.is_ok(){
+    ResultBody::convert(SUCCESS, "保存成功")
+  } else {
+    ResultBody::convert(READ_CONFIG_INFO_ERROR, "写入失败")
+  }
+}
+
 pub fn io_create_new_repo(repo_path_string: String) -> String{
   let repo_path = PathBuf::new().join(repo_path_string);
   let result = create_new_repo(repo_path.clone());
@@ -108,6 +117,15 @@ pub fn io_create_new_repo(repo_path_string: String) -> String{
     ResultBody::convert(SUCCESS, "创建仓库成功")
   } else {
     ResultBody::convert(GIT_REPO_NOT_EXIST, "创建仓库失败")
+  }
+}
+
+pub fn read_current_project_buffer() -> String{
+  let result = info::read_current_project_buffer();
+  return if result.is_ok(){
+    ResultBody::convert(SUCCESS, result.unwrap().as_str())
+  } else {
+    ResultBody::convert(READ_CONFIG_INFO_ERROR, "读取失败")
   }
 }
 

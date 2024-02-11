@@ -32,6 +32,16 @@ fn git_create_new_repo(info: String) -> String{
     io::io_create_new_repo(info)
 }
 
+#[tauri::command]
+fn store_current_proj(curr_proj_info: String) -> String {
+    io::io_store_current_project(curr_proj_info)
+}
+
+#[tauri::command]
+fn read_current_proj_buffer() -> String{
+    io::read_current_project_buffer()
+}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
@@ -42,6 +52,8 @@ fn main() {
             get_config_info,
             update_config_info,
             git_create_new_repo,
+            store_current_proj,
+            read_current_proj_buffer,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

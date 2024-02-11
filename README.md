@@ -21,7 +21,7 @@
 - [ ] 代码模板
 
 ### 贡献指南
-[CONTRIBUTING](./CONTRIBUTING)
+[CONTRIBUTING](./CONTRIBUTING.md)
 
 ## 鸣谢
 

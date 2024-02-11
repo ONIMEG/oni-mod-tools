@@ -14,12 +14,16 @@ import { ref } from 'vue';
 import CreateCsProject from '../components/CreateCsProject.vue';
 import {
   getSavedSolutionsList,
+  read_current_project_buffer,
   ResultBody,
   SolutionItem,
+  StatusCode,
+  store_current_project,
 } from '../uitls/invokes';
 import { CaretDownFilled as DownArrow, CloseOutlined } from '@vicons/antd';
 import { useProjectStore } from '../store/project.store';
 import CreateSolution from '../components/CreateSolution.vue';
+import GitRepo from '../components/GitRepo.vue';
 
 const message = useMessage();
 const projectInfo = useProjectStore();
@@ -52,6 +56,20 @@ const selectOneSolution = function (solution: SolutionItem) {
   projectInfo.createProjectInfo.solution_name = solution.name;
   projectInfo.createProjectInfo.root = solution.path;
   selectSolutionModalShow.value = false;
+  const result = store_current_project({
+    root: solution.path,
+    solution_name: solution.name,
+    project_name: '',
+  });
+  message.info(JSON.stringify(result));
+};
+const createOneSolution = async function () {
+  const result = await store_current_project(projectInfo.createProjectInfo);
+  if (result.code != StatusCode.SUCCESS) {
+    message.warning('暂存当前项目信息失败' + result.message);
+  }
+  title.value = projectInfo.createProjectInfo.solution_name;
+  createNewSolutionModalShow.value = false;
 };
 
 async function getSolutionList() {
@@ -62,6 +80,18 @@ async function getSolutionList() {
   }
   solutionList.value = JSON.parse(result.message);
 }
+
+async function getBufferCurrentProject() {
+  let result: ResultBody = await read_current_project_buffer();
+  if (result.code != StatusCode.SUCCESS) {
+    message.error('读取缓存信息失败！' + result.message);
+    return;
+  }
+  projectInfo.createProjectInfo = JSON.parse(result.message);
+  title.value = projectInfo.createProjectInfo.solution_name;
+}
+
+getBufferCurrentProject();
 </script>
 
 <template>
@@ -93,11 +123,7 @@ async function getSolutionList() {
           </n-button>
         </template>
         <CreateSolution
-          @create="
-            () => {
-              createNewSolutionModalShow = false;
-            }
-          "
+          @create="createOneSolution()"
         />
       </n-card>
     </n-modal>
@@ -123,8 +149,10 @@ async function getSolutionList() {
       <n-tab-pane name="oasis" tab="新建模组" id="create-cs-project">
         <CreateCsProject />
       </n-tab-pane>
-<!--      <n-tab-pane name="the beatles" tab="编译变量"> Hey Jude </n-tab-pane>-->
-      <n-tab-pane name="the " tab="仓库"></n-tab-pane>
+      <!--      <n-tab-pane name="the beatles" tab="编译变量"> Hey Jude </n-tab-pane>-->
+      <n-tab-pane name="the " tab="仓库">
+        <GitRepo />
+      </n-tab-pane>
     </n-tabs>
   </div>
 </template>

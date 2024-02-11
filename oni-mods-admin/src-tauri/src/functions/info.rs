@@ -62,6 +62,14 @@ pub fn save_config_file(config_info:&ConfigInfo) -> Result<(), AnyError>{
     Ok(())
 }
 
+pub fn info_store_current_project(project_info:String) -> Result<(), AnyError>{
+    fs::write(Path::new("./curr_proj.buf"), project_info)?;
+    Ok(())
+}
+
+pub fn read_current_project_buffer() -> Result<String, AnyError>{
+    Ok(fs::read_to_string(Path::new("./curr_proj.buf"))?)
+}
 #[cfg(test)]
 mod test{
     use super::*;
@@ -83,5 +91,11 @@ mod test{
         let result = refresh_version();
         println!("{:?}",result);
         assert_eq!(result.is_ok(),true)
+    }
+
+    #[test]
+    fn test(){
+        let result = info_store_current_project(String::from("sssss"));
+        println!("{:?}", result)
     }
 }

@@ -19,6 +19,7 @@ import {
 } from '../uitls/invokes';
 import { useRouter } from 'vue-router';
 import { dialog } from '@tauri-apps/api';
+import { useProjectStore } from '../store/project.store';
 
 const router = useRouter();
 const formRef = ref<FormInst | null>(null);
@@ -27,13 +28,22 @@ const formInfo = ref<CreateProjectInfo>({
   project_name: '',
   solution_name: 'ONI-Mods',
 });
+const projectInfo = useProjectStore();
 const loadingVisible = ref<boolean>(false);
 const message = useMessage();
 const createGitRepo = ref<boolean>(false);
 const reg: RegExp = /^[a-zA-Z0-9_-]+$/;
+const pathReg: RegExp = /^[a-zA-Z]:\\((?:[^\\"<>|?*:]+\\)+)$/;
 const emit = defineEmits(['create']);
 
 function createStatus(value: string) {
+  if (!value || !reg.test(value)) {
+    return 'error';
+  }
+  return 'success';
+}
+
+function createPathStatus(value: string) {
   if (!value || !reg.test(value)) {
     return 'error';
   }
@@ -51,15 +61,20 @@ function createFeedback(value: string) {
 
 async function create(e: MouseEvent) {
   e.preventDefault();
-  if (createStatus(formInfo.value.solution_name) === 'error') {
-    message.warning('请正确填写信息');
-    return;
-  }
+  if (formInfo.value.root == '')
+    if (
+      createStatus(formInfo.value.solution_name) === 'error' ||
+      createPathStatus(formInfo.value.root) === 'error'
+    ) {
+      message.warning('请正确填写信息');
+      return;
+    }
   loadingVisible.value = true;
   const result: ResultBody = await createProject(formInfo.value);
   loadingVisible.value = false;
   if (result.code === StatusCode.SUCCESS) {
     message.success('成功');
+    projectInfo.createProjectInfo = formInfo.value;
     emit('create', true);
     if (createGitRepo.value) {
       console.log(formInfo.value);

@@ -83,3 +83,18 @@ export async function initGitRepo(info: string): Promise<ResultBody> {
   });
   return JSON.parse(result);
 }
+
+export async function store_current_project(
+  curr_proj: CreateProjectInfo,
+): Promise<ResultBody> {
+  const currProjInfo: string = JSON.stringify(curr_proj);
+  const result: string = await invoke<string>('store_current_proj', {
+    currProjInfo,
+  });
+  return JSON.parse(result);
+}
+
+export async function read_current_project_buffer(): Promise<ResultBody> {
+  const result: string = await invoke<string>('read_current_proj_buffer', {});
+  return JSON.parse(result);
+}
