@@ -11,7 +11,6 @@ import {
 import { ref } from 'vue';
 import {
   NButton,
-  NCard,
   NForm,
   NFormItem,
   NFormItemGi,
@@ -26,7 +25,7 @@ const projectStore = useProjectStore();
 const buttonLoading = ref<boolean>(false);
 const message = useMessage();
 const refreshVersionSpinShow = ref<boolean>(false);
-const createProjectInfo = ref<Project>({
+const emptyProjectInfo: Project = {
   PropertyGroup: {
     AssemblyTitle: '',
     FileVersion: '1.0.0',
@@ -36,7 +35,8 @@ const createProjectInfo = ref<Project>({
     LastWorkingBuild: 526233,
     Platforms: 'Vanilla;Mergedown',
   },
-});
+};
+const createProjectInfo = ref<Project>(emptyProjectInfo);
 
 async function back() {
   router.back();
@@ -65,6 +65,7 @@ async function createProject() {
   if (result.code === StatusCode.SUCCESS) {
     message.success('创建成功');
     buttonLoading.value = false;
+    createProjectInfo.value = emptyProjectInfo;
     return;
   }
   message.error('创建失败' + result.message);

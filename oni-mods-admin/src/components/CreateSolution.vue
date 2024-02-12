@@ -4,8 +4,8 @@ import {
   NFormItem,
   NInput,
   NButton,
-  NRadio,
   NInputGroup,
+  NCheckbox,
   FormInst,
   useMessage,
 } from 'naive-ui';
@@ -16,6 +16,7 @@ import {
   ResultBody,
   StatusCode,
   initGitRepo,
+  store_current_project,
 } from '../uitls/invokes';
 import { useRouter } from 'vue-router';
 import { dialog } from '@tauri-apps/api';
@@ -75,9 +76,12 @@ async function create(e: MouseEvent) {
   if (result.code === StatusCode.SUCCESS) {
     message.success('成功');
     projectInfo.createProjectInfo = formInfo.value;
+    const result = await store_current_project(formInfo.value);
+    if (result.code != StatusCode.SUCCESS) {
+      message.warning('暂存当前项目信息失败' + result.message);
+    }
     emit('create', true);
     if (createGitRepo.value) {
-      console.log(formInfo.value);
       await gitRepoInit(
         formInfo.value.root + '//' + formInfo.value.solution_name,
       );
@@ -149,9 +153,9 @@ async function selectPath() {
       <n-input v-model:value="formInfo.solution_name" placeholder="解决方案" />
     </n-form-item>
     <n-form-item>
-      <n-radio :default-checked="false" v-model:checked="createGitRepo">
+      <n-checkbox :default-checked="false" v-model:checked="createGitRepo">
         是否初始化 Git 仓库
-      </n-radio>
+      </n-checkbox>
     </n-form-item>
     <n-form-item>
       <div id="confirm-info">

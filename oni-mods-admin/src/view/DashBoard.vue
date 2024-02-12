@@ -24,6 +24,7 @@ import { CaretDownFilled as DownArrow, CloseOutlined } from '@vicons/antd';
 import { useProjectStore } from '../store/project.store';
 import CreateSolution from '../components/CreateSolution.vue';
 import GitRepo from '../components/GitRepo.vue';
+import { useRouter } from 'vue-router';
 
 const message = useMessage();
 const projectInfo = useProjectStore();
@@ -31,6 +32,7 @@ const solutionList = ref<SolutionItem[]>([]);
 const title = ref<string>('solution-title');
 const selectSolutionModalShow = ref<boolean>(false);
 const createNewSolutionModalShow = ref<boolean>(false);
+const router = useRouter();
 const options = ref([
   {
     label: '切换解决方案',
@@ -85,6 +87,9 @@ async function getBufferCurrentProject() {
   let result: ResultBody = await read_current_project_buffer();
   if (result.code != StatusCode.SUCCESS) {
     message.error('读取缓存信息失败！' + result.message);
+    if (result.message == '读取失败') {
+      await router.push('/first_solution');
+    }
     return;
   }
   projectInfo.createProjectInfo = JSON.parse(result.message);
@@ -122,9 +127,7 @@ getBufferCurrentProject();
             </template>
           </n-button>
         </template>
-        <CreateSolution
-          @create="createOneSolution()"
-        />
+        <CreateSolution @create="createOneSolution()" />
       </n-card>
     </n-modal>
     <div id="header">
@@ -192,9 +195,4 @@ getBufferCurrentProject();
   width: 60vw;
 }
 
-.n-card {
-  max-width: 65vw;
-  box-sizing: border-box;
-  height: auto;
-}
 </style>
